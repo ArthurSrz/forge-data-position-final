@@ -396,16 +396,30 @@ def gatherizer_tab():
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+1000)
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
         profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
-        st.dataframe(grist_question_df)
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
-        st.dataframe(df)
-    
+
         # Append the data to the df_answers DataFrame
         df_answers = df_answers.append(df, ignore_index=True)
+    
+    #if error continue
+    
+    #df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: x[0])
+    
+    try:
+        df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: x[0])
+    except IndexError as e:
+        print(f"An IndexError occurred: {e}")
+        pass  # continue execution even if an IndexError occurs
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        pass  # continue execution for any other exception
+    
     
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
     df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
+    
+    
     
     #remove "[]" and " ' " from the profile type column
     df_answers['profile_type'] = df_answers['profile_type'].str.strip('[]').str.strip("'")
