@@ -372,22 +372,86 @@ def gatherizer_tab():
     
    
     grist_question_df = grist_question_df 
-    ## from the data, select the unique questions
-    unique_questions = grist_question_df.question.unique()
-    unique_reponse = grist_question_df.reponse.unique()
     
-    ## create a form to gather the answers from the population
+    ## from the database, select the screening questions
+    introduction_question_df = grist_question_df[grist_question_df.type == "screening"]
+    unique_introduction_questions = introduction_question_df.question.unique()
+    
+    ## from the data, select the unique questions
+    unique_questions = grist_question_df[grist_question_df.type == "expertise"].question.unique()
+    unique_reponse = grist_question_df[grist_question_df.type == "expertise"].reponse.unique()
+    
+    ## create a form to get respondent name and email
     st.header("Qui êtes-vous ? :disguised_face:")
     nom = st.text_input("Nom", key='nom')
     prenom = st.text_input("Prenom", key='prenom')
     mail = st.text_input("Mail", key='mail')
     #append the values of the inputs to the df_answers
     # df_answers = df_answers.append({'nom': nom, 'prenom': prenom, 'mail': mail}, ignore_index=True)
+    
+    ## create a form to do some profiling
+    st.header("Quel(s) profil(s) data êtes-vous ?:male-detective:")
+    for i, question_people in enumerate(unique_introduction_questions):
+        st.write(question_people)
+        answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+1000)
+        score = grist_question_df[grist_question_df.reponse == answer_people].score.values
+        profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
+        st.dataframe(df)
+    
+        # Append the data to the df_answers DataFrame
+        df_answers = df_answers.append(df, ignore_index=True)
+    
+    # convert the score and profile_type columns to int and string
+    df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
+    df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
+    
+    #remove "[]" and " ' " from the profile type column
+    df_answers['profile_type'] = df_answers['profile_type'].str.strip('[]').str.strip("'")
+    
+    
+    ## get the names of the tables inside Grist
+    subdomain = "docs"
+    doc_id = "nSV5r7CLQCWzKqZCz7qBor"
+    table_id = "Form3"
+    url = f"https://{subdomain}.getgrist.com/api/docs/{doc_id}/tables"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        tables = response.json()
+        
+    else:
+        print(f"Request failed with status code {response.status_code}")
+    
+    #create a function to add the answers to the st.session_state
+    def add_answers_to_grist_table(df_answers, table_id):
+
+        # Convert DataFrame to list of records
+        records = [{"fields": {"nom":record["nom"],"prenom":record["prenom"],"question":record["question"],"reponse":record["reponse"],"mail":record["mail"],"score": record["score"], "profile_type": record["profile_type"]}} for record in df_answers.to_dict(orient='records')]
+        
+        # Prepare the request body
+        data = {"records": records}
+        docId = "nSV5r7CLQCWzKqZCz7qBor"
+        tableId = table_id
+
+        # Use the Grist API to add the new rows to the specified Grist table
+        url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+        
+        
+        response = requests.post(url, headers=headers, json=data)
+    
+    if st.button("Je valide", key=78):
+        add_answers_to_grist_table(df_answers, st.session_state.table_id)
+        #st.session_state.selected_data = df_answers
+        #conn.update(worksheet="Gatherizer", data=df_answers)
+        st.success("Bien reçu ! A bientôt <3")
+    
+    # Create a form to assess the level of expertise of each respondent
     st.header("Parlons de vous (et de data) :floppy_disk: ")
     
     
     
-
+    
+    
     ## for each question, display the question and the possible answers
     for i, question_people in enumerate(unique_questions):
         st.write(question_people)
