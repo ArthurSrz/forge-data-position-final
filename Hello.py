@@ -380,7 +380,7 @@ def gatherizer_tab():
     grist_question_df = grist_question_df 
     
     ## from the database, select the screening questions
-    introduction_question_df = grist_question_df[grist_question_df.type == "screening"]
+    introduction_question_df = grist_question_df[grist_question_df.question_type == "screening"]
     unique_introduction_questions = introduction_question_df.question.unique()
     
     #get the list of selected profils present in st.session_state.profiles
@@ -392,8 +392,8 @@ def gatherizer_tab():
     
     
     ## from the data, select the unique questions
-    unique_questions = grist_question_df[grist_question_df.type == "expertise"].question.unique()
-    unique_reponse = grist_question_df[grist_question_df.type == "expertise"].reponse.unique()
+    unique_questions = grist_question_df[grist_question_df.question_type == "expertise"].question.unique()
+    unique_reponse = grist_question_df[grist_question_df.question_type == "expertise"].reponse.unique()
     
     ## create a form to get respondent name and email
     st.header("Qui êtes-vous ? :disguised_face:")
