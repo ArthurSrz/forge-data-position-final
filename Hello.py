@@ -377,21 +377,25 @@ def gatherizer_tab():
    
     grist_question_df = grist_question_df 
     
-    ## from the database, select the screening questions
-    introduction_question_df = grist_question_df[grist_question_df.type == "screening"]
-    unique_introduction_questions = introduction_question_df.question.unique()
+    
     
     #get the list of selected profils present in st.session_state.profiles
     selected_profiles = st.session_state.profiles
 
+    ## from the database, select the screening questions
+    introduction_question_df = grist_question_df[(grist_question_df.question_type == "screening") & (grist_question_df.profile_type.isin(selected_profiles))]
+    unique_introduction_questions = introduction_question_df.question.unique()
 
-    #from the data, filter only the data that is related to the selected profiles
-    grist_question_df = grist_question_df[grist_question_df.profile_type.isin(selected_profiles)]
+    #from the data, filter only the expertise data related to the selected profiles
+    unique_expertise_questions = grist_question_df[(grist_question_df.question_type == "expertise") & (grist_question_df.profile_type.isin(selected_profiles))]
     
+    #from the data, filter only the mastery data related to the selected profiles
+    unique_mastery_questions = grist_question_df[(grist_question_df.question_type == "mastery") & (grist_question_df.profile_type.isin(selected_profiles))]
     
     ## from the data, select the unique questions
-    unique_questions = grist_question_df[grist_question_df.type == "expertise"].question.unique()
-    unique_reponse = grist_question_df[grist_question_df.type == "expertise"].reponse.unique()
+    unique_questions = grist_question_df[grist_question_df.question_type == "expertise"].question.unique()
+    unique_reponse = grist_question_df[grist_question_df.question_type == "expertise"].reponse.unique()
+    
     
     ## create a form to get respondent name and email
     st.header("Qui êtes-vous ? :disguised_face:")
@@ -406,12 +410,15 @@ def gatherizer_tab():
     for i, question_people in enumerate(unique_introduction_questions):
         st.write(question_people)
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+1000)
+        question_type = grist_question_df[grist_question_df.reponse == answer_people].question_type.values
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
         profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
-        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
 
         # Append the data to the df_answers DataFrame
         df_answers = df_answers.append(df, ignore_index=True)
+    
+    
     
     #if error continue
     
@@ -472,12 +479,36 @@ def gatherizer_tab():
         #conn.update(worksheet="Gatherizer", data=df_answers)
         st.success("Bien reçu ! A bientôt <3")
     
+    
     # Create a form to assess the level of expertise of each respondent
     st.header("Parlons de vous (et de data) :floppy_disk: ")
     
+    ########
+    st.dataframe(df_answers[df_answers['profile_type'] == 'Data Analyst'])
+    ########
+    
+    #define what the unique questions are depending on the score for each profile
+    df_analyst = df_answers[df_answers['profile_type'] == 'Data Analyst']
+    df_scientist = df_answers[df_answers['profile_type'] == 'Data Scientist']
+    df_dpo = df_answers[df_answers['profile_type'] == 'Data Protection Officer']
     
     
+    ############### create a logic to display questionns based on previous response
+    #create an empty ndarray
+    #unique_questions = np.array([])
     
+    if df_analyst['score'].sum() >= 4:
+        ############
+        st.write("Vous êtes un Data Analyst")
+        ###########
+        # append the unique questions to the ndarray
+        #unique_questions = grist_question_df[grist_question_df.question_type == "expertise"].question.unique()
+        #unique_questions = np.append(unique_questions, df_analyst[df_analyst['question_type'] == 'expertise'])
+        #unique_questions = unique_expertise_questions
+    
+    st.write(type(unique_questions))
+    
+    ################ end 
     
     ## for each question, display the question and the possible answers
     for i, question_people in enumerate(unique_questions):
