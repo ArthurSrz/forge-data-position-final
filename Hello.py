@@ -495,18 +495,19 @@ def gatherizer_tab():
     
     ############### create a logic to display questionns based on previous response
     #create an empty ndarray
-    #unique_questions = np.array([])
+    unique_questions = np.array([])
     
     if df_analyst['score'].sum() >= 4:
         ############
         st.write("Vous êtes un Data Analyst")
+        st.dataframe(df_analyst)
         ###########
         # append the unique questions to the ndarray
         #unique_questions = grist_question_df[grist_question_df.question_type == "expertise"].question.unique()
-        #unique_questions = np.append(unique_questions, df_analyst[df_analyst['question_type'] == 'expertise'])
-        #unique_questions = unique_expertise_questions
+        # append the unique questions to the ndarray
+        unique_questions = np.append(unique_questions, df_analyst[df_analyst['question_type'] == 'expertise'].question.unique())
     
-    st.write(type(unique_questions))
+    st.write(unique_questions)
     
     ################ end 
     
