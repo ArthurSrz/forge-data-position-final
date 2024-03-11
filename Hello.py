@@ -132,7 +132,7 @@ menu_data = [
 if 'selected_tab' not in st.session_state:
     st.session_state.selected_tab = "Qualification"
 
-#initialize selected_data in session state
+#initialize selected_data in session state.
 if 'selected_data' not in st.session_state:
     st.session_state.selected_data = {}
 # La mission était claire : sauver le royaume des données...
