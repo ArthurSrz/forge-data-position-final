@@ -21,7 +21,6 @@ from grist_api import GristDocAPI
 import requests
 ### json to transform json files returned by the Grist API into a dataframe
 import json
-import streamlit as st
 import numpy as np
 import json
 import time
@@ -162,15 +161,22 @@ def colorizer_tab():
             st.text("Data Position Maitre")
             expander = st.expander("Description")
             expander.write("Le Data Position par défaut créé par Datactivist")
+            #make checkboxes where the users get to choose which profile he is going to evaluate
+            profiles = st.multiselect(
+                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer"],max_selections=5)          
             if st.button("Charger le data position",type="primary", key=1):
+                st.session_state.profiles = profiles
                 st.session_state.selected_data = data2
                 st.session_state.table_id = table_id_3
                 st.success("Data position chargé 🚚")
+                
+            
     with col2:
         with st.container(border=True):
             st.text("Data Position pour Hackathon")
             expander = st.expander("Description")
             expander.write("Le Data Position créé pour organiser les participants d'un Hackathon en équipe")
+            #make checkboxes where the users get to choose which profile he is going to evaluate
             st.button("Charger le data position",type="primary", key=4)
     with col3:
         with st.container(border=True):
@@ -330,7 +336,7 @@ def colorizer_tab():
                     
 ## create a tab to gather the answers from the population to questions added to the database
 def gatherizer_tab():
-    print(st.session_state)
+    
     if 'table_id' not in st.session_state:
         st.warning("Veuillez charger un data position")
         return
@@ -376,6 +382,14 @@ def gatherizer_tab():
     ## from the database, select the screening questions
     introduction_question_df = grist_question_df[grist_question_df.type == "screening"]
     unique_introduction_questions = introduction_question_df.question.unique()
+    
+    #get the list of selected profils present in st.session_state.profiles
+    selected_profiles = st.session_state.profiles
+    
+    
+    #from the data, filter only the data that is related to the selected profiles
+    grist_question_df = grist_question_df[grist_question_df.profile_type.isin(selected_profiles)]
+    
     
     ## from the data, select the unique questions
     unique_questions = grist_question_df[grist_question_df.type == "expertise"].question.unique()
@@ -462,9 +476,6 @@ def gatherizer_tab():
     
     # Create a form to assess the level of expertise of each respondent
     st.header("Parlons de vous (et de data) :floppy_disk: ")
-    
-    
-    
     
     
     ## for each question, display the question and the possible answers
