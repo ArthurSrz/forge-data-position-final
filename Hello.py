@@ -510,6 +510,90 @@ def gatherizer_tab():
     for i, question_people in enumerate(unique_questions):
         st.write(question_people)
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i)
+        question_type = grist_question_df[grist_question_df.reponse == answer_people].question_type.values
+        score = grist_question_df[grist_question_df.reponse == answer_people].score.values
+        profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
+        
+    
+        # Append the data to the df_answers DataFrame
+        df_answers = df_answers.append(df, ignore_index=True)
+    
+    # convert the score and profile_type columns to int and string
+    df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
+    df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
+    #remove "[]" and " ' " from the profile type column
+    df_answers['profile_type'] = df_answers['profile_type'].str.strip('[]').str.strip("'")
+    
+    
+   ## get the names of the tables inside Grist
+    subdomain = "docs"
+    doc_id = "nSV5r7CLQCWzKqZCz7qBor"
+    table_id = "Form3"
+    url = f"https://{subdomain}.getgrist.com/api/docs/{doc_id}/tables"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        tables = response.json()
+        
+    else:
+        print(f"Request failed with status code {response.status_code}")
+    
+    #create a function to add the answers to the st.session_state
+    def add_answers_to_grist_table(df_answers, table_id):
+
+        # Convert DataFrame to list of records
+        records = [{"fields": {"nom":record["nom"],"prenom":record["prenom"],"question":record["question"],"reponse":record["reponse"],"mail":record["mail"],"score": record["score"], "profile_type": record["profile_type"]}} for record in df_answers.to_dict(orient='records')]
+        
+        # Prepare the request body
+        data = {"records": records}
+        docId = "nSV5r7CLQCWzKqZCz7qBor"
+        tableId = table_id
+
+        # Use the Grist API to add the new rows to the specified Grist table
+        url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+        
+        
+        response = requests.post(url, headers=headers, json=data)
+        
+        
+    
+    
+    ## Create a button to add the answers to the Grist table
+    if st.button("Je valide"):
+        
+        add_answers_to_grist_table(df_answers, st.session_state.table_id)
+        st.session_state.selected_data = df_answers
+        #conn.update(worksheet="Gatherizer", data=df_answers)
+        st.success("Bien reçu ! A bientôt <3")
+    
+    
+    st.header("Qu'en est-il de votre expertise (toujours data) :smile: ")
+    
+    
+    #define what the unique questions are depending on the score for each profile
+    df_analyst = grist_question_df[grist_question_df['profile_type'] == 'Data Analyst']
+    df_scientist = grist_question_df[grist_question_df['profile_type'] == 'Data Scientist']
+    df_dpo = grist_question_df[grist_question_df['profile_type'] == 'Data Protection Officer']
+    
+    ############### create a logic to display questionns based on previous response
+    
+    unique_questions_mastery = np.array([])
+    
+    if df_answers[(df_answers['profile_type'] == 'Data Analyst')&(df_answers['question_type'] == 'expertise')]['score'].sum() >= 6:
+        unique_questions_mastery = np.append(unique_questions_mastery, df_analyst[df_analyst['question_type'] == 'mastery'].question.unique())
+    
+    if df_answers[(df_answers['profile_type'] == 'Data Scientist')&(df_answers['question_type'] == 'expertise')]['score'].sum() >= 6:
+        unique_questions_mastery = np.append(unique_questions_mastery, df_scientist[df_scientist['question_type'] == 'mastery'].question.unique())
+    
+    if df_answers[(df_answers['profile_type'] == 'Data Protection Officer')&(df_answers['question_type'] == 'expertise')]['score'].sum() >= 6:
+        unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
+    
+    ################ end 
+    
+    ## for each question, display the question and the possible answers
+    for i, question_people in enumerate(unique_questions_mastery):
+        st.write(question_people)
+        answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+3)
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
         profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
@@ -558,7 +642,7 @@ def gatherizer_tab():
     
     
     ## Create a button to add the answers to the Grist table
-    if st.button("Je valide"):
+    if st.button("Je valide", key = 201):
         
         add_answers_to_grist_table(df_answers, st.session_state.table_id)
         st.session_state.selected_data = df_answers
