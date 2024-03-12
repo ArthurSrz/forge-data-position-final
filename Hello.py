@@ -164,7 +164,7 @@ def colorizer_tab():
             expander.write("Le Data Position par défaut créé par Datactivist")
             #make checkboxes where the users get to choose which profile he is going to evaluate
             profiles = st.multiselect(
-                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer"],max_selections=5)      
+                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer", "Data Protection Officer"],max_selections=5)      
             if st.button("Charger le data position",type="primary", key=1):
                 st.session_state.profiles = profiles
                 st.session_state.selected_data = data2
@@ -483,31 +483,26 @@ def gatherizer_tab():
     # Create a form to assess the level of expertise of each respondent
     st.header("Parlons de vous (et de data) :floppy_disk: ")
     
-    ########
-    st.dataframe(df_answers[df_answers['profile_type'] == 'Data Analyst'])
-    ########
     
     #define what the unique questions are depending on the score for each profile
-    df_analyst = df_answers[df_answers['profile_type'] == 'Data Analyst']
-    df_scientist = df_answers[df_answers['profile_type'] == 'Data Scientist']
-    df_dpo = df_answers[df_answers['profile_type'] == 'Data Protection Officer']
+    df_analyst = grist_question_df[grist_question_df['profile_type'] == 'Data Analyst']
+    df_scientist = grist_question_df[grist_question_df['profile_type'] == 'Data Scientist']
+    df_dpo = grist_question_df[grist_question_df['profile_type'] == 'Data Protection Officer']
+    
     
     
     ############### create a logic to display questionns based on previous response
-    #create an empty ndarray
+    
     unique_questions = np.array([])
     
-    if df_analyst['score'].sum() >= 4:
-        ############
-        st.write("Vous êtes un Data Analyst")
-        st.dataframe(df_analyst)
-        ###########
-        # append the unique questions to the ndarray
-        #unique_questions = grist_question_df[grist_question_df.question_type == "expertise"].question.unique()
-        # append the unique questions to the ndarray
+    if df_answers[df_answers['profile_type'] == 'Data Analyst']['score'].sum() >= 4:
         unique_questions = np.append(unique_questions, df_analyst[df_analyst['question_type'] == 'expertise'].question.unique())
     
-    st.write(unique_questions)
+    if df_answers[df_answers['profile_type'] == 'Data Scientist']['score'].sum() >= 4:
+        unique_questions = np.append(unique_questions, df_scientist[df_scientist['question_type'] == 'expertise'].question.unique())
+    
+    if df_answers[df_answers['profile_type'] == 'Data Protection Officer']['score'].sum() >= 4:
+        unique_questions = np.append(unique_questions, df_dpo[df_dpo['question_type'] == 'expertise'].question.unique())
     
     ################ end 
     
