@@ -416,7 +416,7 @@ def gatherizer_tab():
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
 
         # Append the data to the df_answers DataFrame
-        df_answers = df_answers.append(df, ignore_index=True)
+        df_answers = pd.concat([df_answers, df], ignore_index=True)
     
     
     
