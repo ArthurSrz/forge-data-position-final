@@ -517,7 +517,7 @@ def gatherizer_tab():
         
     
         # Append the data to the df_answers DataFrame
-        df_answers = df_answers.append(df, ignore_index=True)
+        df_answers = pd.concat([df_answers, df], ignore_index=True)
     
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
@@ -600,7 +600,7 @@ def gatherizer_tab():
         
     
         # Append the data to the df_answers DataFrame
-        df_answers = df_answers.append(df, ignore_index=True)
+        df_answers = pd.concat([df_answers, df], ignore_index=True)
     
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
