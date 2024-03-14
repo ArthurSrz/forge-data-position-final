@@ -717,7 +717,7 @@ def dispenser_tab():
                 data=DATA,
                 keys=unique_noms,
                 indexBy="profile",
-                maxValue = 4,
+                maxValue = 20,
                 valueFormat=">-.2f",
                 curve="linearClosed",
                 margin={ "top": 70, "right": 80, "bottom": 40, "left": 80 },
