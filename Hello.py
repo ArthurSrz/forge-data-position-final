@@ -164,7 +164,7 @@ def colorizer_tab():
             expander.write("Le Data Position par défaut créé par Datactivist")
             #make checkboxes where the users get to choose which profile he is going to evaluate
             profiles = st.multiselect(
-                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer", "Data Protection Officer"],max_selections=5)      
+                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer", "Data Protection Officer", "Chef de Projet Data"],max_selections=5)      
             if st.button("Charger le data position",type="primary", key=1):
                 st.session_state.profiles = profiles
                 st.session_state.selected_data = data2
@@ -407,6 +407,7 @@ def gatherizer_tab():
     
     ## create a form to do some profiling
     st.header("Quel(s) profil(s) data êtes-vous ?:male-detective:")
+    
     for i, question_people in enumerate(unique_introduction_questions):
         st.write(question_people)
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+1000)
@@ -593,7 +594,7 @@ def gatherizer_tab():
     ## for each question, display the question and the possible answers
     for i, question_people in enumerate(unique_questions_mastery):
         st.write(question_people)
-        answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+3)
+        answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+104)
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
         profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
