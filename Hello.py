@@ -265,8 +265,8 @@ def colorizer_tab():
 
             # Formater le dictionnaire selon le format souhaité
             formatted_data = {'records': [{'id': record['id'], 'fields': {k: record[k] for k in record if k != 'id'}} for record in data_dict]}
-            print("Formatted data is")
-            print(formatted_data)
+            #print("Formatted data is")
+            #print(formatted_data)
 
         
             
@@ -334,7 +334,7 @@ def colorizer_tab():
                     
 ## create a tab to gather the answers from the population to questions added to the database
 def gatherizer_tab():
-    print(st.session_state)
+    #print(st.session_state)
     if 'table_id' not in st.session_state:
         st.warning("Veuillez charger un data position")
         return
@@ -578,16 +578,43 @@ def gatherizer_tab():
     
     ############### create a logic to display questionns based on previous response
     
+
     unique_questions_mastery = np.array([])
+
+    score_analyst_df = df_answers[df_answers['profile_type'] == 'Data Analyst'] 
+    score_scientist_df = df_answers[df_answers['profile_type'] == 'Data Scientist'] 
+    score_dpo_df = df_answers[df_answers['profile_type'] == 'Data Protection Officer'] 
+
+    for score_df in [score_analyst_df, score_scientist_df, score_dpo_df]:
+        sum_expertise_score = score_df[(score_df['question_type'] == 'expertise')]['score'].sum()
+
+        if sum_expertise_score > 6:
+            if score_df is score_analyst_df:
+                unique_questions_mastery = np.append(unique_questions_mastery, df_analyst[df_analyst['question_type'] == 'mastery'].question.unique())
+            elif score_df is score_scientist_df:
+                unique_questions_mastery = np.append(unique_questions_mastery, df_scientist[df_scientist['question_type'] == 'mastery'].question.unique())
+            elif score_df is score_dpo_df:
+                unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
+
+
+
+    #unique_questions_mastery = np.array([])
+    #condition = (df_answers['question_type'] == 'expertise').all()
+
+    #score_analyst_df = df_answers[df_answers['profile_type'] == 'Data Analyst'] 
+    #score_scientist_df = df_answers[df_answers['profile_type'] == 'Data Scientist'] 
+    #score_dpo_df = df_answers[df_answers['profile_type'] == 'Data Protection Officer'] 
+
+    #st.dataframe(score_analyst_df.loc[condition])
+    #if score_analyst_df.loc[condition]['score'].sum() >= 6:
+    #    unique_questions_mastery = np.append(unique_questions_mastery, df_analyst[df_analyst['question_type'] == 'mastery'].question.unique())
+
+    #if score_scientist_df.loc[condition]['score'].sum() >= 6:
+    #    unique_questions_mastery = np.append(unique_questions_mastery, df_scientist[df_scientist['question_type'] == 'mastery'].question.unique())
     
-    if df_answers[(df_answers['profile_type'] == 'Data Analyst')&(df_answers['question_type'] == 'expertise')]['score'].sum() >= 6:
-        unique_questions_mastery = np.append(unique_questions_mastery, df_analyst[df_analyst['question_type'] == 'mastery'].question.unique())
-    
-    if df_answers[(df_answers['profile_type'] == 'Data Scientist')&(df_answers['question_type'] == 'expertise')]['score'].sum() >= 6:
-        unique_questions_mastery = np.append(unique_questions_mastery, df_scientist[df_scientist['question_type'] == 'mastery'].question.unique())
-    
-    if df_answers[(df_answers['profile_type'] == 'Data Protection Officer')&(df_answers['question_type'] == 'expertise')]['score'].sum() >= 6:
-        unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
+    #if score_dpo_df.loc[condition]['score'].sum() >= 6:
+    #    unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
+
     
     ################ end 
     
