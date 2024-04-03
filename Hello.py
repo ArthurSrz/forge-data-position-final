@@ -735,6 +735,7 @@ def dispenser_tab():
                 # Vérifiez s'il y a des données pour le nom et le profil actuels
                 if not filtered_data.empty:
                     score = filtered_data['score'].tolist()
+                    score = [int(x) for x in score if isinstance(x, (int, np.integer))]
                     total_score = sum(score)
                     profile_data[nom] = total_score
             st.write(profile_data)
