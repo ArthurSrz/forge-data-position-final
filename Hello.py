@@ -716,28 +716,28 @@ def dispenser_tab():
         form_data = data
         #filter form data so to delete all rows where "nom" is empty
         # Assuming 'nom' is the column name where you want to check for empty values
-        form_data_filtered = [row for row in form_data if len(row) > 0]
-        st.write(form_data)
+        form_data_filtered = form_data[form_data['mail'].str.contains('@')]
         # Obtenez les valeurs uniques de la colonne "nom"
-        unique_noms = form_data['nom'].unique()
+        unique_noms = form_data_filtered['nom'].unique()
 
         # Créez la structure de données DATA
         DATA = []
 
         # Pour chaque profil unique, créez un dictionnaire
-        for profile_type in form_data['profile_type'].unique():
+        for profile_type in form_data_filtered['profile_type'].unique():
             profile_data = {"profile": profile_type}
 
             # Parcourez les noms uniques
             for nom in unique_noms:
                 # Filtrer le DataFrame pour obtenir les lignes correspondant au nom et profil
-                filtered_data = form_data[(form_data['nom'] == nom) & (form_data['profile_type'] == profile_type)]
+                filtered_data = form_data_filtered[(form_data_filtered['nom'] == nom) & (form_data_filtered['profile_type'] == profile_type)]
         
                 # Vérifiez s'il y a des données pour le nom et le profil actuels
                 if not filtered_data.empty:
-                    score = filtered_data['score']
-                    profile_data[nom] = score
-
+                    score = filtered_data['score'].tolist()
+                    total_score = sum(score)
+                    profile_data[nom] = total_score
+            st.write(profile_data)
             DATA.append(profile_data)
 
             # Affichez la liste DATA
@@ -748,7 +748,7 @@ def dispenser_tab():
                 data=DATA,
                 keys=unique_noms,
                 indexBy="profile",
-                maxValue = 20,
+                maxValue = 40,
                 valueFormat=">-.2f",
                 curve="linearClosed",
                 margin={ "top": 70, "right": 80, "bottom": 40, "left": 80 },
