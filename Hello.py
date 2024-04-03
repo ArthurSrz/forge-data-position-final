@@ -736,8 +736,8 @@ def dispenser_tab():
 
             DATA.append(profile_data)
 
-        # Affichez la liste DATA
-        #st.write(DATA)
+            # Affichez la liste DATA
+            st.write(unique_noms)
 
         with mui.Box(sx={"height": 500}):
             nivo.Radar(
