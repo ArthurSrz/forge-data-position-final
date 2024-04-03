@@ -714,6 +714,10 @@ def dispenser_tab():
     st.markdown("Grâce au _radar graph_, analysez la distribution des profils au sein de votre population")
     with elements("nivo_charts"):
         form_data = data
+        #filter form data so to delete all rows where "nom" is empty
+        # Assuming 'nom' is the column name where you want to check for empty values
+        form_data_filtered = [row for row in form_data if len(row) > 0]
+        st.write(form_data)
         # Obtenez les valeurs uniques de la colonne "nom"
         unique_noms = form_data['nom'].unique()
 
@@ -737,7 +741,7 @@ def dispenser_tab():
             DATA.append(profile_data)
 
             # Affichez la liste DATA
-            st.write(unique_noms)
+            #st.write(DATA)
 
         with mui.Box(sx={"height": 500}):
             nivo.Radar(
