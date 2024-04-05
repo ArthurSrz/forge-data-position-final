@@ -707,11 +707,10 @@ def dispenser_tab():
                     score = [int(x) for x in score if isinstance(x, (int, np.integer))]
                     total_score = sum(score)
                     profile_data[nom] = total_score
-            st.write(profile_data)
+            
             DATA.append(profile_data)
 
-            # Affichez la liste DATA
-            #st.write(DATA)
+            
 
         with mui.Box(sx={"height": 500}):
             nivo.Radar(
