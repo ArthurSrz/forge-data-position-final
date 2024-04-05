@@ -399,7 +399,6 @@ def gatherizer_tab():
         profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         profile_type_vals = profile_type_vals.tolist()
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
-        st.dataframe(df)
         # Append the data to the df_answers DataFrame
         df_answers = pd.concat([df_answers, df], ignore_index=True)
         
