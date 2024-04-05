@@ -1,33 +1,16 @@
-
-# Le vent glacial s'engouffrait dans le code balayant les lignes de pandas et les colonnes de Streamlit. 
-# C'était une nuit sombre dans le monde virtuel de Forge Data, où les profils data se dissimulaient dans l'ombre du code.
-
-
-## Import the required tool (libraries) to build the app
-
-### pandas for data manipulation
 import pandas as pd
-### streamlit for the app
 import streamlit as st
-### streamlit_gsheets so to connect the app Google Sheets
 from streamlit_gsheets import GSheetsConnection
-### hydralit to display a nice navigation bar
 import hydralit_components as hc
-### streamlit_elements to display the radar graph where the position of individuals will be displayed
 from streamlit_elements import nivo, elements, mui, html
-### Grist API so to connect the app to a Grist database
 from grist_api import GristDocAPI
-### requests to use the Grist API
 import requests
-### json to transform json files returned by the Grist API into a dataframe
 import json
 import streamlit as st
 import numpy as np
 import json
 import time
 
-# Le héros, un valeureux programmeur, maniait son clavier comme une épée..
-#...naviguant entre les méandres de GSheets et les terres inexplorées de Streamlit.
 
 
 ## Set the page title and favicon of the app
@@ -413,13 +396,14 @@ def gatherizer_tab():
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+1000)
         question_type = grist_question_df[grist_question_df.reponse == answer_people].question_type.values
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
-        profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
-        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
-
+        profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
+        profile_type_vals = profile_type_vals.tolist()
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
+        st.dataframe(df)
         # Append the data to the df_answers DataFrame
         df_answers = pd.concat([df_answers, df], ignore_index=True)
-    
-    
+        
+
     
     #if error continue
     
@@ -438,8 +422,7 @@ def gatherizer_tab():
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
     df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
-    
-    
+    df_answers['question_type'] = df_answers['question_type'].apply(lambda x: str(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (str)) else str(x) if isinstance(x, (str)) else str(x))
     
     #remove "[]" and " ' " from the profile type column
     df_answers['profile_type'] = df_answers['profile_type'].str.strip('[]').str.strip("'")
@@ -523,6 +506,8 @@ def gatherizer_tab():
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
     df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
+    df_answers['question_type'] = df_answers['question_type'].apply(lambda x: str(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (str)) else str(x) if isinstance(x, (str)) else str(x))
+
     #remove "[]" and " ' " from the profile type column
     df_answers['profile_type'] = df_answers['profile_type'].str.strip('[]').str.strip("'")
     
@@ -543,7 +528,7 @@ def gatherizer_tab():
     def add_answers_to_grist_table(df_answers, table_id):
 
         # Convert DataFrame to list of records
-        records = [{"fields": {"nom":record["nom"],"prenom":record["prenom"],"question":record["question"],"reponse":record["reponse"],"mail":record["mail"],"score": record["score"], "profile_type": record["profile_type"]}} for record in df_answers.to_dict(orient='records')]
+        records = [{"fields": {"nom":record["nom"],"prenom":record["prenom"],"question":record["question"],"reponse":record["reponse"],"mail":record["mail"],"score": record["score"], "profile_type": record["profile_type"],"question_type": record["question_type"]}} for record in df_answers.to_dict(orient='records')]
         
         # Prepare the request body
         data = {"records": records}
@@ -585,8 +570,10 @@ def gatherizer_tab():
     score_scientist_df = df_answers[df_answers['profile_type'] == 'Data Scientist'] 
     score_dpo_df = df_answers[df_answers['profile_type'] == 'Data Protection Officer'] 
 
+    st.write(score_analyst_df)
+    
     for score_df in [score_analyst_df, score_scientist_df, score_dpo_df]:
-        sum_expertise_score = score_df[(score_df['question_type'] == 'expertise')]['score'].sum()
+        sum_expertise_score = score_df[score_df['question_type'] == 'expertise']['score'].sum()
 
         if sum_expertise_score > 6:
             if score_df is score_analyst_df:
@@ -595,26 +582,10 @@ def gatherizer_tab():
                 unique_questions_mastery = np.append(unique_questions_mastery, df_scientist[df_scientist['question_type'] == 'mastery'].question.unique())
             elif score_df is score_dpo_df:
                 unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
-
-
-
-    #unique_questions_mastery = np.array([])
-    #condition = (df_answers['question_type'] == 'expertise').all()
-
-    #score_analyst_df = df_answers[df_answers['profile_type'] == 'Data Analyst'] 
-    #score_scientist_df = df_answers[df_answers['profile_type'] == 'Data Scientist'] 
-    #score_dpo_df = df_answers[df_answers['profile_type'] == 'Data Protection Officer'] 
-
-    #st.dataframe(score_analyst_df.loc[condition])
-    #if score_analyst_df.loc[condition]['score'].sum() >= 6:
-    #    unique_questions_mastery = np.append(unique_questions_mastery, df_analyst[df_analyst['question_type'] == 'mastery'].question.unique())
-
-    #if score_scientist_df.loc[condition]['score'].sum() >= 6:
-    #    unique_questions_mastery = np.append(unique_questions_mastery, df_scientist[df_scientist['question_type'] == 'mastery'].question.unique())
     
-    #if score_dpo_df.loc[condition]['score'].sum() >= 6:
-    #    unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
-
+    #transform score 
+    st.write(unique_questions_mastery)
+    
     
     ################ end 
     
