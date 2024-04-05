@@ -136,7 +136,7 @@ def gatherizer_tab():
    
     subdomain = "docs"
     doc_id = "nSV5r7CLQCWzKqZCz7qBor"
-    table_id = st.session_state.table_id
+    table_id = "Form3"
     url = f"https://{subdomain}.getgrist.com/api/docs/{doc_id}/tables/{table_id}/records"
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
