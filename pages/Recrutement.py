@@ -127,34 +127,32 @@ def gatherizer_tab():
     st.title("Recrutement des profils data")
     st.markdown("Bienvenue sur le formulaire de recrutement. Répondez aux questions pour valider votre candidature. Nous reviendrons vers vous très vite.")
     
-    ## Check if there are data available loaded
-    
-    
-    
-    #print(st.session_state.selected_data)
-    #if 'colorizer_data' in st.session_state:
-    #    
-    #    df_colorizer = st.session_state.colorizer_data
-    #    st.session_state.selected_data = df_colorizer
-    #    st.success("Données chargées depuis le DataFrame de session")
-
     
     
     ## create an empty dataframe to store the answers
     df_answers = pd.DataFrame(columns=['nom', 'prenom', 'mail', 'question', 'reponse', 'score','profile_type'])
     
-    ## if grist was used, transform the json file into a dataframe
-    grist_question_df = st.session_state.selected_data
-    
+    #Load data from Grist
+   
+    subdomain = "docs"
+    doc_id = "nSV5r7CLQCWzKqZCz7qBor"
+    table_id = st.session_state.table_id
+    url = f"https://{subdomain}.getgrist.com/api/docs/{doc_id}/tables/{table_id}/records"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        data0 = response.json()
+        columns = data0['records'][0]['fields'].keys()
+        #print(list(columns)[0])
+        # Process the data as needed
+    else:
+        print(f"Request failed with status code {response.status_code}")
 
-
-    #print(grist_question_df['records'])
-    records = grist_question_df['records']
+    records = data0['records']
     grist_question_df = pd.json_normalize(records, sep='_')
-    ## clean the column names to display them in a nice way in the app
 
+    ## clean the column names to display them in a nice way in the app
     grist_question_df.columns = [col.replace('fields_', '') for col in grist_question_df.columns]
-    #print(grist_question_df)
+    print(grist_question_df)
     
     
     
