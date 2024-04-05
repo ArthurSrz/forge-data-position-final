@@ -106,9 +106,7 @@ else:
 
 ## generate the different tabs of the app
 menu_data = [
-    {'icon': "far fa-copy", 'label': "Qualification"},
-    {'icon': "far fa-copy", 'label': "Recrutement"},
-    {'icon': "far fa-copy", 'label': "Position"},
+    {'icon': "far fa-copy", 'label': "Recrutement"}
 ]
 
 ## Set the default tab of the app to "Qualification"
@@ -118,206 +116,10 @@ if 'selected_tab' not in st.session_state:
 #initialize selected_data in session state.
 if 'selected_data' not in st.session_state:
     st.session_state.selected_data = {}
-# La mission était claire : sauver le royaume des données...
-# ...en recrutant les profils data les plus qualifiés.
-
-
-## Create a tab to add the answers to the database
-def colorizer_tab():
-    
-    st.title("Qualifier vos profils data")
-    
-    #Create empty containers for space
-    container = st.container(border=False)
-    container.write("")
-    container.write("")
-    container.write("")
-    container.write("")
-    
-    
-    
-    st.header("En utilisant les Data Position de la communauté")
-    col1, col2, col3 = st.columns(3)
-    
-    # Create elements with the different data positions that can be used
-    with col1:
-        with st.container(border=True):
-            st.text("Data Position Maitre")
-            expander = st.expander("Description")
-            expander.write("Le Data Position par défaut créé par Datactivist")
-            #make checkboxes where the users get to choose which profile he is going to evaluate
-            profiles = st.multiselect(
-                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer", "Data Protection Officer", "Chef de Projet Data"],max_selections=5)      
-            if st.button("Charger le data position",type="primary", key=1):
-                st.session_state.profiles = profiles
-                st.session_state.selected_data = data2
-                st.session_state.table_id = table_id_3
-                st.success("Data position chargé 🚚")
-    with col2:
-        with st.container(border=True):
-            st.text("Data Position pour Hackathon")
-            expander = st.expander("Description")
-            expander.write("Le Data Position créé pour organiser les participants d'un Hackathon en équipe")
-            st.button("Charger le data position",type="primary", key=4)
-    with col3:
-        with st.container(border=True):
-            st.text("__")
-            expander = st.expander("Description")
-            expander.write("___")
-            st.button("Charger le data position",type="primary", key=7)
-    
-    #Create empty containers for space
-    container = st.container(border=False)
-    container.write("")
-    container.write("")
-    container.write("")
-    container.write("")
-    container.write("")
-    
-    
-    
-    col1, col2 = st.columns(2)
-    
-    ## Create a storage where the data will be stored dynamically
-    if 'data' not in st.session_state:
-        st.session_state.data = {
-            'profile_type':[],
-            'question': [],
-            'reponse': [],
-            'score': []
-        }    
-        st.session_state.data['reponse'] = []
-# Tandis que le programmeur avançait, les énigmes se dressaient sur son chemin. 
-# Des questions sur les compétences, des réponses à choisir, des niveaux de maîtrise à déterminer. Chaque ligne de code était une bataille, chaque requête une épreuve.
-    
-    
-    
-    ## Create the form to add questions to the Grist table
-    with col1:
-
-        st.header('En créant votre Data Position :sunglasses:')
-        profile_type = st.text_input("Le profil")
-        question = st.text_input("La question")
-        reponse = st.text_input("Une réponse possible")
-        score = st.selectbox("Le niveau de maitrise associé", [1, 2, 3, 4])
-        
-        # Le héros se heurta à une forteresse appelée Grist API, où des clés secrètes ouvraient les portes des données convoitées. 
-        # Les réponses étaient extraites, les colonnes alignées, et le programmeur se fraya un chemin à travers le labyrinthe des requêtes HTTP.
-        
-        ## Create a function to add the answers to the Grist table
-        def add_data_to_grist_table(profile_type, question, reponse, score):
-            # Create a new row with the provided data
-            new_records = [
-                {'profile_type': profile_type, 'question': question, 'reponse': reponse, 'score': score}
-                ]
-
-            # Use the Grist API to add the new row to the Grist table
-            api.add_records('Form0', new_records)
-        
-        ## Button to add questions to Grist
-        
-        #st.session_state.data['profile_type'].append(profile_type)
-        #st.session_state.data['question'].append(question)
-        #st.session_state.data['reponse'].append(reponse)
-        #st.session_state.data['score'].append(score)
-        
-        #print(st.session_state.data)
-        
-        if st.button("Ajouter", key=78):
-            
-            #create an empty dataframe to store the answers
-            new_df = pd.DataFrame(columns=['profile_type', 'question', 'reponse', 'score'])
-            
-            #Add the input values to new_df
-            new_df = new_df.append({'profile_type': profile_type, 'question': question, 'reponse': reponse, 'score': score}, ignore_index=True)
-            print(new_df)
-
-            # Add the input values to Grist table
-            existing_data = data0
-            # Extraction des données
-            records = existing_data['records']
-            formatted_data = [{'id': record['id'], **record['fields']} for record in records]
-            existing_data = pd.DataFrame(formatted_data)
-            
-            
-            combined_df = pd.concat([existing_data, new_df], ignore_index=True)
-            
-            
-            # Convertir le DataFrame en dictionnaire
-            data_dict = combined_df.to_dict(orient='records')
-
-            # Formater le dictionnaire selon le format souhaité
-            formatted_data = {'records': [{'id': record['id'], 'fields': {k: record[k] for k in record if k != 'id'}} for record in data_dict]}
-            #print("Formatted data is")
-            #print(formatted_data)
-
-        
-            
-            add_data_to_grist_table(profile_type, question, reponse, score)
-            
-            st.session_state.selected_data = formatted_data
-            
-        
-            st.session_state.table_id = table_id_0
-            st.success("Data added to Grist table")
-            
-            # Mise à jour du DataFrame st.session_state.selected_data
-            #if 'selected_data' not in st.session_state or not isinstance(st.session_state.selected_data, pd.DataFrame):
-            #    st.session_state.selected_data = pd.DataFrame(columns=['profile_type', 'question', 'reponse', 'score'])
-
-            #new_data = pd.DataFrame({'profile_type': [profile_type], 'question': [question], 'reponse': [reponse], 'score': [score]})
-    
-            # Assurez-vous que les colonnes sont dans le même ordre
-            #new_data = new_data[st.session_state.selected_data.columns]
-
-            #st.session_state.selected_data = pd.concat([st.session_state.selected_data, new_data], ignore_index=True)
-            
-            
-            #json_records = st.session_state.selected_data.to_dict(orient='records')
-            #json_data = {'records': json_records}
-            #print("JSON is ")
-            #print(json_data)
-            #st.session_state.selected_data = json_data
-            #st.session_state.table_id = table_id_0
-            #st.success("Data added to Grist table")
-            
-        ## Button to add questions Google spreadsheet
-
-        #if st.button("Ajouter", key=10):
-        #    st.session_state.data['profile_type'].append(profile_type)
-        #    st.session_state.data['question'].append(question)
-        #    st.session_state.data['answer'].append(answer)
-        #    st.session_state.data['score'].append(score)
-        #    # Combine the existing data from Google Sheets and new data
-        #    existing_data = conn.read(worksheet="Colorizer", usecols=["question","answer","score","profile_type"],ttl=0, nrows=10)
-        #    existing_df = pd.DataFrame(existing_data)
-        #    #st.write("Existing Data:")
-        #    #st.dataframe(existing_df)
-        #    new_df = pd.DataFrame(st.session_state.data)
-        #    #st.write("New Data:")
-        #    #st.dataframe(new_df)
-        #    combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-        #    #st.write("Combined Data:")
-        #    #st.dataframe(combined_df)
-        #    conn.update(worksheet="Colorizer", data=combined_df)
-        #    st.success("Data added to Google Sheets")
-        #    st.session_state.data = {
-        #        'profile_type': [],
-        #        'question': [],
-        #        'answer': [],
-        #        'score': []
-        #    }
-    
-     
-    with col2:
-        ## display an image with inspiration for the question that can be asked
-        st.header("Une source d'inspiration :star-struck:")
-        st.image("resource/skills_framework.png")
-         
-                    
+                
 ## create a tab to gather the answers from the population to questions added to the database
 def gatherizer_tab():
-    #print(st.session_state)
+    print(st.session_state)
     if 'table_id' not in st.session_state:
         st.warning("Veuillez charger un data position")
         return
@@ -343,6 +145,9 @@ def gatherizer_tab():
     
     ## if grist was used, transform the json file into a dataframe
     grist_question_df = st.session_state.selected_data
+    
+
+
     #print(grist_question_df['records'])
     records = grist_question_df['records']
     grist_question_df = pd.json_normalize(records, sep='_')
@@ -653,149 +458,10 @@ def gatherizer_tab():
 # Le vent souffla plus fort alors que le programmeur invoquait le puissant radar graph pour analyser la distribution des profils. 
 # Des profils émergeaient, formant des constellations dans le ciel de données.
 
-def dispenser_tab():
-    
-    
-    ## Load Data from Grist
-    subdomain = "docs"
-    doc_id = "nSV5r7CLQCWzKqZCz7qBor"
-    table_id = st.session_state.table_id
-    print(table_id)
-    url = f"https://{subdomain}.getgrist.com/api/docs/{doc_id}/tables/{table_id}/records"
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-        data = response.json()
-        print("Houra")
-        columns = data['records'][0]['fields'].keys()
-        #print(list(columns)[0])
-        # Process the data as needed
-    else:
-        print(f"Request failed with status code {response.status_code}")
-    
-    #turn data into a dataframe with columns "nom","prenom","mail","question","answer","score","profile_type"
-    records = data['records']
-    data = pd.json_normalize(records, sep='_')
-    data.columns = [col.replace('fields_', '') for col in data.columns]
-    
-    
-    st.header("Position des profils")
-    st.markdown("Grâce au _radar graph_, analysez la distribution des profils au sein de votre population")
-    with elements("nivo_charts"):
-        form_data = data
-        #filter form data so to delete all rows where "nom" is empty
-        # Assuming 'nom' is the column name where you want to check for empty values
-        form_data_filtered = form_data[form_data['mail'].str.contains('@')]
-        # Obtenez les valeurs uniques de la colonne "nom"
-        unique_noms = form_data_filtered['nom'].unique()
-
-        # Créez la structure de données DATA
-        DATA = []
-
-        # Pour chaque profil unique, créez un dictionnaire
-        for profile_type in form_data_filtered['profile_type'].unique():
-            profile_data = {"profile": profile_type}
-
-            # Parcourez les noms uniques
-            for nom in unique_noms:
-                # Filtrer le DataFrame pour obtenir les lignes correspondant au nom et profil
-                filtered_data = form_data_filtered[(form_data_filtered['nom'] == nom) & (form_data_filtered['profile_type'] == profile_type)]
-        
-                # Vérifiez s'il y a des données pour le nom et le profil actuels
-                if not filtered_data.empty:
-                    score = filtered_data['score'].tolist()
-                    score = [int(x) for x in score if isinstance(x, (int, np.integer))]
-                    total_score = sum(score)
-                    profile_data[nom] = total_score
-            
-            DATA.append(profile_data)
-
-            
-
-        with mui.Box(sx={"height": 500}):
-            nivo.Radar(
-                data=DATA,
-                keys=unique_noms,
-                indexBy="profile",
-                maxValue = 40,
-                valueFormat=">-.2f",
-                curve="linearClosed",
-                margin={ "top": 70, "right": 80, "bottom": 40, "left": 80 },
-                borderColor={ "theme": "grid.line.stroke" },
-                gridLabelOffset=36,
-                dotSize=8,
-                dotColor={ "theme": "background" },
-                dotBorderWidth=2,
-                motionConfig="wobbly",
-                legends=[
-                    {
-                        "anchor": "top-left",
-                        "direction": "column",
-                        "translateX": -50,
-                        "translateY": -40,
-                        "itemWidth": 80,
-                        "itemHeight": 20,
-                        "itemTextColor": "#999",
-                        "symbolSize": 12,
-                        "symbolShape": "circle",
-                        "effects": [
-                            {
-                                "on": "hover",
-                                "style": {
-                                    "itemTextColor": "#000"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                theme={
-                    "background": "#FFFFFF",
-                    "textColor": "#31333F",
-                    "tooltip": {
-                        "container": {
-                            "background": "#FFFFFF",
-                            "color": "#31333F",
-                        }
-                    }
-                }
-            )
-# Mais la quête n'était pas terminée. Le héros se plongea dans la création des groupes, attribuant des profils à des cohortes spécifiques. 
-# Le tableau se transforma en un champ de bataille stratégique, où chaque programmeur était assigné à sa place.
-
-    #create a df that is form_data df but group by name
-    #form_data = form_data[form_data['score'].notna()]
-    #form_data['score'] = form_data['score'].astype(int)
-    #form_data_grouped = form_data.groupby(['nom', 'prenom'])['score'].mean().reset_index()
-    #form_data_grouped['groupe'] = pd.NA
-    #st.header("Constitution des groupes")
-    #st.markdown("Répartissez les profils au sein de groupes")
-    #groups = st.data_editor(
-    #    form_data_grouped,
-    #    column_config={
-    #        "group": st.column_config.NumberColumn(
-    #            "Group",
-    #            help="What group",
-    #            min_value=1,
-    #            max_value=10,
-    #            step=1,
-    #            format="%d 👭",
-    #    )
-    #    }
-    #)
-    #st.dataframe(groups)
-    #st.write(st.session_state)
-    #if st.button("Assigner", key=8):
-    #    conn.update(worksheet="Dispenser", data=groups)
-    #    st.success("C'est fait !")
-        
-
-
 
 # Create a function to display the selected tab content
 def display_tab_content(tab_label):
-    if tab_label == "Qualification":
-        colorizer_tab()
-    elif tab_label == "Recrutement":
+    if tab_label == "Recrutement":
         gatherizer_tab()
     elif tab_label == "Position":
         dispenser_tab()
@@ -822,10 +488,3 @@ display_tab_content(selected_tab_label)
 # Store the selected tab in the session state
 if selected_tab_label != st.session_state.selected_tab:
     st.session_state.selected_tab = selected_tab_label
-
-# Get the id of the menu item clicked
-#st.info(f"Selected tab: {selected_tab_label}")
-#st.info(f"Menu {menu_id}")
-
-# Et ainsi se termina cette saga épique, où le codeur du monde virtuel triompha des énigmes, manipula les données et forgea un chemin vers la victoire. 
-# Un conte de programmation, où chaque ligne de code était une ligne de l'histoire, tissée dans le tissu du royaume virtuel.
