@@ -569,7 +569,7 @@ def gatherizer_tab():
     score_scientist_df = df_answers[df_answers['profile_type'] == 'Data Scientist'] 
     score_dpo_df = df_answers[df_answers['profile_type'] == 'Data Protection Officer'] 
 
-    st.write(score_analyst_df)
+    
     
     for score_df in [score_analyst_df, score_scientist_df, score_dpo_df]:
         sum_expertise_score = score_df[score_df['question_type'] == 'expertise']['score'].sum()
@@ -582,8 +582,7 @@ def gatherizer_tab():
             elif score_df is score_dpo_df:
                 unique_questions_mastery = np.append(unique_questions_mastery, df_dpo[df_dpo['question_type'] == 'mastery'].question.unique())
     
-    #transform score 
-    st.write(unique_questions_mastery)
+    
     
     
     ################ end 
