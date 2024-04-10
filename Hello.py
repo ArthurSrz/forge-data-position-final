@@ -139,6 +139,24 @@ def colorizer_tab():
     st.header("En utilisant les Data Position de la communauté")
     col1, col2, col3 = st.columns(3)
     
+    #create a function to add config_info to the config grist
+    def add_config(df_config):
+
+        # Convert DataFrame to list of records
+        records = [{"fields": {"table_id":record["table_id"],"profiles":record["profiles"]}} for record in df_config.to_dict(orient='records')]
+        
+        # Prepare the request body
+        data = {"records": records}
+        docId = "nSV5r7CLQCWzKqZCz7qBor"
+        tableId = "Config"
+        
+        # Use the Grist API to add the new rows to the specified Grist table
+        url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+        response = requests.post(url, headers=headers, json=data) 
+        #write the response detail
+        st.write(response.json())
+        st.success("Data added to Grist table")
+    
     # Create elements with the different data positions that can be used
     with col1:
         with st.container(border=True):
@@ -152,7 +170,12 @@ def colorizer_tab():
                 st.session_state.profiles = profiles
                 st.session_state.selected_data = data2
                 st.session_state.table_id = table_id_3
+                df_config = pd.DataFrame({'table_id': table_id_3, 'profiles': [profiles]})
+                st.dataframe(df_config)
+                #send data to the config grist
+                add_config(df_config)
                 st.success("Data position chargé 🚚")
+                
     with col2:
         with st.container(border=True):
             st.text("Data Position pour Hackathon")
@@ -166,6 +189,7 @@ def colorizer_tab():
             expander.write("___")
             st.button("Charger le data position",type="primary", key=7)
     
+      
     #Create empty containers for space
     container = st.container(border=False)
     container.write("")
@@ -187,10 +211,7 @@ def colorizer_tab():
             'score': []
         }    
         st.session_state.data['reponse'] = []
-# Tandis que le programmeur avançait, les énigmes se dressaient sur son chemin. 
-# Des questions sur les compétences, des réponses à choisir, des niveaux de maîtrise à déterminer. Chaque ligne de code était une bataille, chaque requête une épreuve.
-    
-    
+
     
     ## Create the form to add questions to the Grist table
     with col1:
@@ -540,8 +561,6 @@ def gatherizer_tab():
         
         response = requests.post(url, headers=headers, json=data)
         
-        
-    
     
     ## Create a button to add the answers to the Grist table
     if st.button("Je valide"):

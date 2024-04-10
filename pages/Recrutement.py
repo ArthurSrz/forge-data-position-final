@@ -119,10 +119,6 @@ if 'selected_data' not in st.session_state:
                 
 ## create a tab to gather the answers from the population to questions added to the database
 def gatherizer_tab():
-    print(st.session_state)
-    if 'table_id' not in st.session_state:
-        st.warning("Veuillez charger un data position")
-        return
     
     st.title("Recrutement des profils data")
     st.markdown("Bienvenue sur le formulaire de recrutement. Répondez aux questions pour valider votre candidature. Nous reviendrons vers vous très vite.")
@@ -132,8 +128,25 @@ def gatherizer_tab():
     ## create an empty dataframe to store the answers
     df_answers = pd.DataFrame(columns=['nom', 'prenom', 'mail', 'question', 'reponse', 'score','profile_type'])
     
-    #Load data from Grist
-   
+    #Load config data from Grist
+    subdomain = "docs"
+    doc_id = "nSV5r7CLQCWzKqZCz7qBor"
+    table_id = "Config"
+    url = f"https://{subdomain}.getgrist.com/api/docs/{doc_id}/tables/{table_id}/records"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        config = response.json()
+        columns = config['records'][0]['fields'].keys()
+        #print(list(columns)[0])
+        # Process the data as needed
+    else:
+        print(f"Request failed with status code {response.status_code}")
+
+    config = config['records']
+    config = pd.json_normalize(config, sep='_')
+    config.columns = [col.replace('fields_', '') for col in config.columns]
+    st.write(config)
+    
     subdomain = "docs"
     doc_id = "nSV5r7CLQCWzKqZCz7qBor"
     table_id = "Form3"
