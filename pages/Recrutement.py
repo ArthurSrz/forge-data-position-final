@@ -217,6 +217,12 @@ def gatherizer_tab():
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
         profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         profile_type_vals = profile_type_vals.tolist()
+        #select the first element of the list except if list is empty
+        if len(profile_type_vals) == 0:
+            profile_type_vals = profile_type_vals
+        else:
+            profile_type_vals= profile_type_vals[0]
+        st.write(profile_type_vals)
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
         # Append the data to the df_answers DataFrame
         df_answers = pd.concat([df_answers, df], ignore_index=True)
@@ -314,8 +320,15 @@ def gatherizer_tab():
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i)
         question_type = grist_question_df[grist_question_df.reponse == answer_people].question_type.values
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
-        profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
-        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
+        profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
+        profile_type_vals = profile_type_vals.tolist()
+        if len(profile_type_vals) == 0:
+            profile_type_vals = profile_type_vals
+        else:
+            profile_type_vals= profile_type_vals[0]
+        st.write(profile_type_vals)
+        
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
         
     
         # Append the data to the df_answers DataFrame
@@ -411,7 +424,15 @@ def gatherizer_tab():
         st.write(question_people)
         answer_people = st.selectbox("Votre réponse", grist_question_df[grist_question_df.question == question_people].reponse.unique(), index=None, key = i+104)
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
-        profile_type_val = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
+        profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
+        profile_type_vals = profile_type_vals.tolist()
+        if len(profile_type_vals) == 0:
+            profile_type_vals = profile_type_vals
+        else:
+            profile_type_vals= profile_type_vals[0]
+        st.write(profile_type_vals)
+        
+        
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
         
     
