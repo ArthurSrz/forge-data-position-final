@@ -182,6 +182,7 @@ def gatherizer_tab():
     
     #get the list of selected profils present in st.session_state.profiles
     #selected_profiles = st.session_state.profiles
+    st.write(config['table_id'].iloc[-1])
     st.write(selected_profiles)
     ## from the database, select the screening questions
     introduction_question_df = grist_question_df[(grist_question_df.question_type == "screening") & (grist_question_df.profile_type.isin(selected_profiles))]
