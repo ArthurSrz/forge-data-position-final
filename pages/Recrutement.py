@@ -364,7 +364,7 @@ def gatherizer_tab():
     ## Create a button to add the answers to the Grist table
     if st.button("Je valide"):
         
-        add_answers_to_grist_table(df_answers, config['table_id'])])
+        add_answers_to_grist_table(df_answers, config['table_id'])
         st.session_state.selected_data = df_answers
         #conn.update(worksheet="Gatherizer", data=df_answers)
         st.success("Bien reçu ! A bientôt <3")
