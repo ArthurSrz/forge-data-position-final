@@ -145,7 +145,7 @@ def gatherizer_tab():
     config = config['records']
     config = pd.json_normalize(config, sep='_')
     config.columns = [col.replace('fields_', '') for col in config.columns]
-    st.write(config)
+    
     
     subdomain = "docs"
     doc_id = "nSV5r7CLQCWzKqZCz7qBor"
@@ -177,10 +177,12 @@ def gatherizer_tab():
     grist_question_df = grist_question_df 
     
     
+    profiles = config['profiles'].iloc[-1]
+    selected_profiles = profiles.split(", ")
     
     #get the list of selected profils present in st.session_state.profiles
-    selected_profiles = st.session_state.profiles
-
+    #selected_profiles = st.session_state.profiles
+    st.write(selected_profiles)
     ## from the database, select the screening questions
     introduction_question_df = grist_question_df[(grist_question_df.question_type == "screening") & (grist_question_df.profile_type.isin(selected_profiles))]
     unique_introduction_questions = introduction_question_df.question.unique()

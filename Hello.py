@@ -143,10 +143,10 @@ def colorizer_tab():
     def add_config(df_config):
 
         # Convert DataFrame to list of records
-        records = [{"fields": {"table_id":record["table_id"],"profiles":record["profiles"]}} for record in df_config.to_dict(orient='records')]
-        
+        records = [{"fields": {"table_id": record["table_id"], "profiles": ", ".join(record["profiles"])}} for record in df_config.to_dict(orient='records')]
         # Prepare the request body
         data = {"records": records}
+        
         docId = "nSV5r7CLQCWzKqZCz7qBor"
         tableId = "Config"
         
@@ -154,7 +154,6 @@ def colorizer_tab():
         url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
         response = requests.post(url, headers=headers, json=data) 
         #write the response detail
-        st.write(response.json())
         st.success("Data added to Grist table")
     
     # Create elements with the different data positions that can be used
@@ -170,8 +169,20 @@ def colorizer_tab():
                 st.session_state.profiles = profiles
                 st.session_state.selected_data = data2
                 st.session_state.table_id = table_id_3
+                
+                subdomain = "docs"
+                docId = "nSV5r7CLQCWzKqZCz7qBor"
+                tableId = "Config"
+                url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+                response = requests.get(url, headers=headers)
+                #st.write(response.json())
+                if response.status_code == 200:
+                    tables = response.json()
+                
+                
+                
                 df_config = pd.DataFrame({'table_id': table_id_3, 'profiles': [profiles]})
-                st.dataframe(df_config)
+                #st.dataframe(df_config)
                 #send data to the config grist
                 add_config(df_config)
                 st.success("Data position chargé 🚚")
@@ -475,8 +486,11 @@ def gatherizer_tab():
         url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
         
         
+        
         response = requests.post(url, headers=headers, json=data)
-    
+        st.write(response.json())
+        st.write(records)
+        
     if st.button("Je valide", key=78):
         add_answers_to_grist_table(df_answers, st.session_state.table_id)
         #st.session_state.selected_data = df_answers
