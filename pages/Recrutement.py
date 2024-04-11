@@ -275,7 +275,7 @@ def gatherizer_tab():
         response = requests.post(url, headers=headers, json=data)
     
     if st.button("Je valide", key=78):
-        add_answers_to_grist_table(df_answers, config['table_id'])
+        add_answers_to_grist_table(df_answers, config['table_id'].iloc[-1])
         #st.session_state.selected_data = df_answers
         #conn.update(worksheet="Gatherizer", data=df_answers)
         st.success("Bien reçu ! A bientôt <3")
@@ -364,7 +364,7 @@ def gatherizer_tab():
     ## Create a button to add the answers to the Grist table
     if st.button("Je valide"):
         
-        add_answers_to_grist_table(df_answers, config['table_id'])
+        add_answers_to_grist_table(df_answers, config['table_id'].iloc[-1])
         st.session_state.selected_data = df_answers
         #conn.update(worksheet="Gatherizer", data=df_answers)
         st.success("Bien reçu ! A bientôt <3")
@@ -459,7 +459,7 @@ def gatherizer_tab():
     ## Create a button to add the answers to the Grist table
     if st.button("Je valide", key = 201):
         
-        add_answers_to_grist_table(df_answers, config['table_id'])
+        add_answers_to_grist_table(df_answers, config['table_id'].iloc[-1])
         st.session_state.selected_data = df_answers
         #conn.update(worksheet="Gatherizer", data=df_answers)
         st.success("Bien reçu ! A bientôt <3")
