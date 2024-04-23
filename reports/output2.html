@@ -1,0 +1,39 @@
+
+            <head>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+                <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.16.3"></script>
+                <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+                <style>
+table, th, td {
+border: 1px solid black;
+border-collapse: collapse;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+.table{
+    width:100%;
+}
+.footn{
+color:#c0c0c0;
+}
+</style>
+            </head>
+            <div><div id="test"></div><script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-dc3574db0b26bba5afab012064a6e5fe"}, "mark": {"type": "bar"}, "encoding": {"color": {"field": "Name", "type": "nominal"}, "x": {"field": "profile", "type": "nominal"}, "y": {"field": "Value", "type": "quantitative"}}, "params": [{"name": "param_15", "select": {"type": "interval", "encodings": ["x", "y"]}, "bind": "scales"}], "title": "Values for Michel and Zinedine by Profile", "$schema": "https://vega.github.io/schema/vega-lite/v5.16.3.json", "datasets": {"data-dc3574db0b26bba5afab012064a6e5fe": [{"profile": "Data Scientist", "Name": "Michel", "Value": 9.0}, {"profile": "", "Name": "Michel", "Value": 0.0}, {"profile": "Machine Learning Engineer", "Name": "Michel", "Value": 4.0}, {"profile": "Data Scientist", "Name": "Zinedine", "Value": 5.0}, {"profile": "", "Name": "Zinedine", "Value": 0.0}, {"profile": "Machine Learning Engineer", "Name": "Zinedine", "Value": null}]}};
+      var embedOpt = { "actions": false };
+
+      function showError(el, error){
+          el.innerHTML = ('<div style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('test');
+      vegaEmbed("#test", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script></div>
+

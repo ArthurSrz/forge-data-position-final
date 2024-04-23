@@ -11,7 +11,7 @@ import numpy as np
 import json
 import time
 import altair as alt
-
+import st_static_export as sse
 
 ## Set the page title and favicon of the app
 st.set_page_config(layout='wide', initial_sidebar_state='collapsed')
@@ -36,6 +36,23 @@ custom_html = """
     }
 </style>
 """
+
+##Instantiate the static export class
+css_text = """
+table, th, td {
+border: 1px solid black;
+border-collapse: collapse;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+.table{
+    width:100%;
+}
+.footn{
+color:#c0c0c0;
+}
+"""
+
+static_html = sse.StreamlitStaticExport(css=css_text)
 
 ## Display the custom HTML
 st.components.v1.html(custom_html)
@@ -280,7 +297,8 @@ def dispenser_tab():
     st.altair_chart(chart)
     static_html.export_altair_graph(id="test", graph=chart)
     
-    
+    with open("reports/output.html", "w") as file:
+        file.write(static_html.create_html("String"))
     
     
 # Mais la quête n'était pas terminée. Le héros se plongea dans la création des groupes, attribuant des profils à des cohortes spécifiques. 
