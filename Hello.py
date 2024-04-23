@@ -260,74 +260,7 @@ def colorizer_tab():
         st.session_state.data['reponse'] = []
 
     
-    ## Create the form to add questions to the Grist table
-    with col1:
-
-        st.header('En créant votre Data Position :sunglasses:')
-        profile_type = st.text_input("Le profil")
-        question = st.text_input("La question")
-        reponse = st.text_input("Une réponse possible")
-        score = st.selectbox("Le niveau de maitrise associé", [1, 2, 3, 4])
-        
-        # Le héros se heurta à une forteresse appelée Grist API, où des clés secrètes ouvraient les portes des données convoitées. 
-        # Les réponses étaient extraites, les colonnes alignées, et le programmeur se fraya un chemin à travers le labyrinthe des requêtes HTTP.
-        
-        ## Create a function to add the answers to the Grist table
-        def add_data_to_grist_table(profile_type, question, reponse, score):
-            # Create a new row with the provided data
-            new_records = [
-                {'profile_type': profile_type, 'question': question, 'reponse': reponse, 'score': score}
-                ]
-
-            # Use the Grist API to add the new row to the Grist table
-            api.add_records('Form0', new_records)
-        
-        ## Button to add questions to Grist
-        
-        #st.session_state.data['profile_type'].append(profile_type)
-        #st.session_state.data['question'].append(question)
-        #st.session_state.data['reponse'].append(reponse)
-        #st.session_state.data['score'].append(score)
-        
-        #print(st.session_state.data)
-        
-        if st.button("Ajouter", key=78):
-            
-            #create an empty dataframe to store the answers
-            new_df = pd.DataFrame(columns=['profile_type', 'question', 'reponse', 'score'])
-            
-            #Add the input values to new_df
-            new_df = new_df.append({'profile_type': profile_type, 'question': question, 'reponse': reponse, 'score': score}, ignore_index=True)
-            print(new_df)
-
-            # Add the input values to Grist table
-            existing_data = data0
-            # Extraction des données
-            records = existing_data['records']
-            formatted_data = [{'id': record['id'], **record['fields']} for record in records]
-            existing_data = pd.DataFrame(formatted_data)
-            
-            
-            combined_df = pd.concat([existing_data, new_df], ignore_index=True)
-            
-            
-            # Convertir le DataFrame en dictionnaire
-            data_dict = combined_df.to_dict(orient='records')
-
-            # Formater le dictionnaire selon le format souhaité
-            formatted_data = {'records': [{'id': record['id'], 'fields': {k: record[k] for k in record if k != 'id'}} for record in data_dict]}
-            #print("Formatted data is")
-            #print(formatted_data)
-
-        
-            
-            add_data_to_grist_table(profile_type, question, reponse, score)
-            
-            st.session_state.selected_data = formatted_data
-            
-        
-            st.session_state.table_id = table_id_0
-            st.success("Data added to Grist table")
+    
             
             # Mise à jour du DataFrame st.session_state.selected_data
             #if 'selected_data' not in st.session_state or not isinstance(st.session_state.selected_data, pd.DataFrame):
@@ -376,11 +309,7 @@ def colorizer_tab():
         #        'score': []
         #    }
     
-     
-    with col2:
-        ## display an image with inspiration for the question that can be asked
-        st.header("Une source d'inspiration :star-struck:")
-        st.image("resource/skills_framework.png")
+    
          
                     
 ## create a tab to gather the answers from the population to questions added to the database
