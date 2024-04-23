@@ -162,7 +162,7 @@ def colorizer_tab():
             expander.write("Le Data Position par défaut créé par Datactivist")
             #make checkboxes where the users get to choose which profile he is going to evaluate
             profiles = st.multiselect(
-                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Géomaticien", "Data Engineer", "Data Protection Officer", "Chef de Projet Data"],max_selections=5)      
+                "Choix des profils",["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Geomaticien", "Data Engineer", "Data Protection Officer", "Chef de Projet Data"],max_selections=5)      
             if st.button("Charger le data position",type="primary", key=1):
                 st.session_state.profiles = profiles
                 st.session_state.selected_data = data2

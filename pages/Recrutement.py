@@ -242,7 +242,7 @@ def gatherizer_tab():
         print(f"An error occurred: {e}")
         pass  # continue execution for any other exception
     
-    
+    st.write(df_answers)
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
     df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
