@@ -278,8 +278,12 @@ def dispenser_tab():
     st.altair_chart(chart)
     static_html.export_altair_graph(id="test", graph=chart)
     nom = data['nom'].iloc[-1]
+    
     with open(f"reports/output_{nom}.html", "w") as file:
         file.write(static_html.create_html("String"))
+    
+    #send the HTML file to the user
+    st.markdown(f"Download the report [here](reports/output_{nom}.html)")
     
     
 # Mais la quête n'était pas terminée. Le héros se plongea dans la création des groupes, attribuant des profils à des cohortes spécifiques. 
