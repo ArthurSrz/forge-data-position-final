@@ -221,7 +221,7 @@ def gatherizer_tab():
             profile_type_vals_vf = profile_type_vals
         else:
             profile_type_vals_vf= profile_type_vals[0]
-        st.write(profile_type_vals_vf)
+        
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals_vf]})
         # Append the data to the df_answers DataFrame
         df_answers = pd.concat([df_answers, df], ignore_index=True)
@@ -322,12 +322,12 @@ def gatherizer_tab():
         profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         profile_type_vals = profile_type_vals.tolist()
         if len(profile_type_vals) == 0:
-            profile_type_vals = profile_type_vals
+            profile_type_vals_vf = profile_type_vals
         else:
-            profile_type_vals= profile_type_vals[0]
+            profile_type_vals_vf = profile_type_vals[0]
         
         
-        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals_vf]})
         
     
         # Append the data to the df_answers DataFrame
@@ -426,13 +426,13 @@ def gatherizer_tab():
         profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         profile_type_vals = profile_type_vals.tolist()
         if len(profile_type_vals) == 0:
-            profile_type_vals = profile_type_vals
+            profile_type_vals_vf = profile_type_vals
         else:
-            profile_type_vals= profile_type_vals[0]
+            profile_type_vals_vf= profile_type_vals[0]
         
         
         
-        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals_vf]})
         
     
         # Append the data to the df_answers DataFrame
