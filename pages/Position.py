@@ -262,26 +262,7 @@ def dispenser_tab():
             )
     
     #make an altair chart to display the data
-    
-    
-    data = [
-        {
-            "profile": "Data Scientist",
-            "Michel": 9,
-            "Zinedine": 5
-        },
-        {
-            "profile": "",
-            "Michel": 0,
-            "Zinedine": 0
-        },
-        {
-            "profile": "Machine Learning Engineer",
-            "Michel": 4
-        }
-    ]
-    
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(DATA)
     
     # Melt the DataFrame to long format for Altair
     df_melted = df.melt(id_vars='profile', var_name='Name', value_name='Value')
@@ -296,8 +277,8 @@ def dispenser_tab():
 
     st.altair_chart(chart)
     static_html.export_altair_graph(id="test", graph=chart)
-    
-    with open("reports/output.html", "w") as file:
+    nom = data['nom'].iloc[-1]
+    with open(f"reports/output_{nom}.html", "w") as file:
         file.write(static_html.create_html("String"))
     
     
