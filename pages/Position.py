@@ -17,7 +17,7 @@ import st_static_export as sse
 st.set_page_config(layout='wide', initial_sidebar_state='collapsed')
 custom_html = """
 <div class="banner">
-    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true" alt="Banner Image">
+    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge_vf.png?raw=true" alt="Banner Image">
 </div>
 <style>
     .banner {
