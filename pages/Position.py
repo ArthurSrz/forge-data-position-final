@@ -10,7 +10,7 @@ import streamlit as st
 import numpy as np
 import json
 import time
-
+import altair as alt
 
 
 ## Set the page title and favicon of the app
@@ -195,7 +195,7 @@ def dispenser_tab():
             DATA.append(profile_data)
 
             
-
+        st.write(DATA)
         with mui.Box(sx={"height": 500}):
             nivo.Radar(
                 data=DATA,
@@ -243,6 +243,46 @@ def dispenser_tab():
                     }
                 }
             )
+    
+    #make an altair chart to display the data
+    
+    
+    data = [
+        {
+            "profile": "Data Scientist",
+            "Michel": 9,
+            "Zinedine": 5
+        },
+        {
+            "profile": "",
+            "Michel": 0,
+            "Zinedine": 0
+        },
+        {
+            "profile": "Machine Learning Engineer",
+            "Michel": 4
+        }
+    ]
+    
+    df = pd.DataFrame(data)
+    
+    # Melt the DataFrame to long format for Altair
+    df_melted = df.melt(id_vars='profile', var_name='Name', value_name='Value')
+    
+    chart = alt.Chart(df_melted).mark_bar().encode(
+        x='profile',
+        y='Value',
+        color='Name'
+    ).properties(
+        title='Values for Michel and Zinedine by Profile'
+    ).interactive()
+
+    st.altair_chart(chart)
+    static_html.export_altair_graph(id="test", graph=chart)
+    
+    
+    
+    
 # Mais la quête n'était pas terminée. Le héros se plongea dans la création des groupes, attribuant des profils à des cohortes spécifiques. 
 # Le tableau se transforma en un champ de bataille stratégique, où chaque programmeur était assigné à sa place.
 
