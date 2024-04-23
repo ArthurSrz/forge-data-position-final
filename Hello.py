@@ -162,7 +162,7 @@ if 'selected_data' not in st.session_state:
 def colorizer_tab():
     
     st.title("Bienvenue dans le Data Position Studio")
-    st.markkdown("Vous avez maintenant la possibilité d'utiliser les Data Position déja créés par la communauté de Datactivist pour identifier quel est votre profil data ou ceux au sein de votre organisation.")
+    st.markdown("Vous avez maintenant la possibilité d'utiliser les Data Position déja créés par la communauté de Datactivist pour identifier quel est votre profil data ou ceux au sein de votre organisation.")
     
     #Create empty containers for space
     container = st.container(border=False)
