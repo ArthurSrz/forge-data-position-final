@@ -261,29 +261,36 @@ def dispenser_tab():
                 }
             )
     
-    #make an altair chart to display the data
-    df = pd.DataFrame(DATA)
+    col1, col2, col3 = st.columns(3)
     
-    # Melt the DataFrame to long format for Altair
-    df_melted = df.melt(id_vars='profile', var_name='Name', value_name='Value')
-    
-    chart = alt.Chart(df_melted).mark_bar().encode(
-        x='profile',
-        y='Value',
-        color='Name'
-    ).properties(
-        title='Values for Michel and Zinedine by Profile'
-    ).interactive()
+    with col1:
+        
+        #make an altair chart to display the data
+        df = pd.DataFrame(DATA)
+        
+        # Filter out rows with empty profile names
+        df = df[df['profile'] != ""]
 
-    st.altair_chart(chart)
-    static_html.export_altair_graph(id="test", graph=chart)
-    nom = data['nom'].iloc[-1]
-    
-    with open(f"reports/output_{nom}.html", "w") as file:
-        file.write(static_html.create_html("String"))
-    
-    #send the HTML file to the user
-    st.markdown(f"Download the report [here](reports/output_{nom}.html)")
+        # Melt the DataFrame to long format for Altair
+        df_melted = df.melt(id_vars='profile', var_name='Name', value_name='Value')
+
+        # Create histograms for the distribution of scores for each profile
+        charts = alt.Chart(df_melted).mark_bar(opacity=0.7).encode(
+            x=alt.X('Value', bin=alt.Bin(maxbins=10), title='Score'),
+            y='count()',
+            color=alt.Color('profile:N', legend=None)
+        ).facet(column='profile', spacing=50, title=None).properties(
+            title='Distribution des Scores par profil'
+        )
+
+       
+        st.altair_chart(charts)
+        
+        
+        
+        
+        
+        
     
     
 # Mais la quête n'était pas terminée. Le héros se plongea dans la création des groupes, attribuant des profils à des cohortes spécifiques. 
