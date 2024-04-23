@@ -161,7 +161,8 @@ if 'selected_data' not in st.session_state:
 ## Create a tab to add the answers to the database
 def colorizer_tab():
     
-    st.title("Qualifier vos profils data")
+    st.title("Bienvenue dans le Data Position Studio")
+    st.markkdown("Vous avez maintenant la possibilité d'utiliser les Data Position déja créés par la communauté de Datactivist pour identifier quel est votre profil data ou ceux au sein de votre organisation.")
     
     #Create empty containers for space
     container = st.container(border=False)
@@ -172,7 +173,7 @@ def colorizer_tab():
     
     
     
-    st.header("En utilisant les Data Position de la communauté")
+    st.header("Liste des Data Position de la communauté")
     col1, col2, col3 = st.columns(3)
     
     #create a function to add config_info to the config grist
@@ -225,16 +226,12 @@ def colorizer_tab():
                 
     with col2:
         with st.container(border=True):
-            st.text("Data Position pour Hackathon")
-            expander = st.expander("Description")
-            expander.write("Le Data Position créé pour organiser les participants d'un Hackathon en équipe")
-            st.button("Charger le data position",type="primary", key=4)
+            st.text("Data Position en cours de création")
+            
     with col3:
         with st.container(border=True):
-            st.text("__")
-            expander = st.expander("Description")
-            expander.write("___")
-            st.button("Charger le data position",type="primary", key=7)
+            st.text("Data Position en cours de création")
+            
     
       
     #Create empty containers for space
