@@ -182,8 +182,6 @@ def gatherizer_tab():
     
     #get the list of selected profils present in st.session_state.profiles
     #selected_profiles = st.session_state.profiles
-    st.write(config['table_id'].iloc[-1])
-    st.write(selected_profiles)
     ## from the database, select the screening questions
     introduction_question_df = grist_question_df[(grist_question_df.question_type == "screening") & (grist_question_df.profile_type.isin(selected_profiles))]
     unique_introduction_questions = introduction_question_df.question.unique()
@@ -217,13 +215,14 @@ def gatherizer_tab():
         score = grist_question_df[grist_question_df.reponse == answer_people].score.values
         profile_type_vals = grist_question_df[grist_question_df.reponse == answer_people].profile_type.values
         profile_type_vals = profile_type_vals.tolist()
+        
         #select the first element of the list except if list is empty
         if len(profile_type_vals) == 0:
-            profile_type_vals = profile_type_vals
+            profile_type_vals_vf = profile_type_vals
         else:
-            profile_type_vals= profile_type_vals[0]
-        st.write(profile_type_vals)
-        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
+            profile_type_vals_vf= profile_type_vals[0]
+        st.write(profile_type_vals_vf)
+        df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals_vf]})
         # Append the data to the df_answers DataFrame
         df_answers = pd.concat([df_answers, df], ignore_index=True)
         
@@ -242,7 +241,7 @@ def gatherizer_tab():
         print(f"An error occurred: {e}")
         pass  # continue execution for any other exception
     
-    st.write(df_answers)
+    
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
     df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
@@ -326,7 +325,7 @@ def gatherizer_tab():
             profile_type_vals = profile_type_vals
         else:
             profile_type_vals= profile_type_vals[0]
-        st.write(profile_type_vals)
+        
         
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals]})
         
@@ -430,7 +429,7 @@ def gatherizer_tab():
             profile_type_vals = profile_type_vals
         else:
             profile_type_vals= profile_type_vals[0]
-        st.write(profile_type_vals)
+        
         
         
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_val]})

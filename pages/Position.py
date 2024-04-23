@@ -212,7 +212,7 @@ def dispenser_tab():
             DATA.append(profile_data)
 
             
-        st.write(DATA)
+        
         with mui.Box(sx={"height": 500}):
             nivo.Radar(
                 data=DATA,
