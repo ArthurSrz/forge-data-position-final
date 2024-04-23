@@ -191,7 +191,7 @@ def colorizer_tab():
         url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
         response = requests.post(url, headers=headers, json=data) 
         #write the response detail
-        st.success("Data added to Grist table")
+        
     
     # Create elements with the different data positions that can be used
     with col1:
