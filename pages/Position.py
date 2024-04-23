@@ -261,30 +261,27 @@ def dispenser_tab():
                 }
             )
     
-    col1, col2, col3 = st.columns(3)
     
-    with col1:
-        
-        #make an altair chart to display the data
-        df = pd.DataFrame(DATA)
-        
-        # Filter out rows with empty profile names
-        df = df[df['profile'] != ""]
-
-        # Melt the DataFrame to long format for Altair
-        df_melted = df.melt(id_vars='profile', var_name='Name', value_name='Value')
-
-        # Create histograms for the distribution of scores for each profile
-        charts = alt.Chart(df_melted).mark_bar(opacity=0.7).encode(
-            x=alt.X('Value', bin=alt.Bin(maxbins=10), title='Score'),
-            y='count()',
-            color=alt.Color('profile:N', legend=None)
-        ).facet(column='profile', spacing=50, title=None).properties(
-            title='Distribution des Scores par profil'
-        )
-
-       
-        st.altair_chart(charts)
+    st.markdown("#### Niveau d'expertise des profils")
+    st.markdown("Grâce aux histogrammes, analysez la distribution des scores pour chaque profil")
+    
+    #make an altair chart to display the data
+    df = pd.DataFrame(DATA)
+    
+    # Filter out rows with empty profile names
+    df = df[df['profile'] != ""]
+    # Melt the DataFrame to long format for Altair
+    df_melted = df.melt(id_vars='profile', var_name='Name', value_name='Value')
+    # Create histograms for the distribution of scores for each profile
+    charts = alt.Chart(df_melted).mark_bar(opacity=0.7).encode(
+        x=alt.X('Value', bin=alt.Bin(maxbins=10), title='Score'),
+        y='count()',
+        color=alt.Color('profile:N', legend=None)
+    ).facet(column='profile', spacing=80, title=None).properties(
+        title=''
+    ).resolve_axis(x='independent',y='independent')
+    
+    st.altair_chart(charts)
         
         
         
