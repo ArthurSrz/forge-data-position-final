@@ -222,25 +222,14 @@ def gatherizer_tab():
         else:
             profile_type_vals_vf= profile_type_vals[0]
         
+        
+        
         df = pd.DataFrame({'nom': [nom], 'prenom': [prenom], 'mail': [mail],'question': [question_people],'question_type':[question_type], 'reponse': [answer_people],'score': [score],'profile_type':[profile_type_vals_vf]})
+        
         # Append the data to the df_answers DataFrame
         df_answers = pd.concat([df_answers, df], ignore_index=True)
         
 
-    
-    #if error continue
-    
-    #df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: x[0])
-    
-    try:
-        df_answers['profile_type'] = df_answers['profile_type'].apply(lambda x: x[0])
-    except IndexError as e:
-        print(f"An IndexError occurred: {e}")
-        pass  # continue execution even if an IndexError occurs
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        pass  # continue execution for any other exception
-    
     
     # convert the score and profile_type columns to int and string
     df_answers['score'] = df_answers['score'].apply(lambda x: int(x[0]) if isinstance(x, np.ndarray) and len(x) > 0 and isinstance(x[0], (int, np.integer)) else int(x) if isinstance(x, (int, np.integer)) else str(x))
@@ -268,7 +257,6 @@ def gatherizer_tab():
 
         # Convert DataFrame to list of records
         records = [{"fields": {"nom":record["nom"],"prenom":record["prenom"],"question":record["question"],"reponse":record["reponse"],"mail":record["mail"],"score": record["score"], "profile_type": record["profile_type"]}} for record in df_answers.to_dict(orient='records')]
-        
         # Prepare the request body
         data = {"records": records}
         docId = "nSV5r7CLQCWzKqZCz7qBor"
