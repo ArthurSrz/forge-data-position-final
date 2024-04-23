@@ -106,9 +106,7 @@ else:
 
 ## generate the different tabs of the app
 menu_data = [
-    {'icon': "far fa-copy", 'label': "Qualification"},
-    {'icon': "far fa-copy", 'label': "Recrutement"},
-    {'icon': "far fa-copy", 'label': "Position"},
+    {'icon': "far fa-copy", 'label': "Qualification"}
 ]
 
 ## Set the default tab of the app to "Qualification"
