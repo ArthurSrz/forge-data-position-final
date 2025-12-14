@@ -23,8 +23,8 @@ st.set_page_config(
 # Inject custom styles (hide sidebar for candidates)
 inject_styles(hide_sidebar=True)
 
-# Banner - seamless integration with large logo using st.image (no iframe)
-col1, col2, col3 = st.columns([1, 3, 1])
+# Banner - large logo centered
+col1, col2, col3 = st.columns([1, 5, 1])
 with col2:
     st.image("resource/logo_forge.png", use_container_width=True)
 

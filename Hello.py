@@ -16,8 +16,8 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Banner - seamless integration with large logo using st.image (no iframe)
-col1, col2, col3 = st.columns([1, 2, 1])
+# Banner - large logo centered
+col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.image("resource/logo_forge.png", use_container_width=True)
 
