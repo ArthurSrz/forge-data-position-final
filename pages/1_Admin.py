@@ -25,8 +25,9 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Banner - full width logo
-st.image("resource/logo_forge.png", use_container_width=True)
+# Logo in sidebar
+with st.sidebar:
+    st.image("resource/logo_forge.png", use_container_width=True)
 
 # Load secrets
 SERVER = st.secrets["grist"]["server"]

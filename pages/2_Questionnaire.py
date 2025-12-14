@@ -23,8 +23,10 @@ st.set_page_config(
 # Inject custom styles (hide sidebar for candidates)
 inject_styles(hide_sidebar=True)
 
-# Banner - full width logo
-st.image("resource/logo_forge.png", use_container_width=True)
+# Small logo at top
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("resource/logo_forge.png", use_container_width=True)
 
 # Constants
 PASS_THRESHOLD = 0.75  # 75% to pass a section

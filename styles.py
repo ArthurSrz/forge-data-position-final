@@ -92,16 +92,26 @@ COMPONENT_CSS = """
     transform: translateY(-1px) !important;
 }
 
-/* Secondary buttons */
-.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]) {
+/* All buttons - Klein Blue border and text */
+.stButton > button {
     background: transparent !important;
-    border: 1px solid var(--color-border) !important;
+    border: 2px solid #002FA7 !important;
     border-radius: 0.5rem !important;
-    transition: all 0.2s ease !important;
+    color: #002FA7 !important;
+    font-weight: 500 !important;
 }
 
-.stButton > button:not([kind="primary"]):not([data-testid="baseButton-primary"]):hover {
-    background: var(--color-bg-secondary) !important;
+/* Page links - Klein Blue border and text */
+.stPageLink a {
+    border: 2px solid #002FA7 !important;
+    border-radius: 0.5rem !important;
+    color: #002FA7 !important;
+    font-weight: 500 !important;
+    background: transparent !important;
+}
+
+.stPageLink a span {
+    color: #002FA7 !important;
 }
 
 /* Expanders */

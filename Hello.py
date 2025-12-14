@@ -3,6 +3,7 @@ La Forge à Data Position - Landing Page
 """
 
 import streamlit as st
+from streamlit_elements import elements, nivo
 from styles import inject_styles
 
 # Page configuration
@@ -16,8 +17,9 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Banner - full width logo
-st.image("resource/logo_forge.png", use_container_width=True)
+# Logo in sidebar
+with st.sidebar:
+    st.image("resource/logo_forge.png", use_container_width=True)
 
 st.markdown("# Bienvenue sur <span style='color:#002FA7'>La Forge</span> à Data Position", unsafe_allow_html=True)
 
@@ -30,6 +32,62 @@ Un **Data Position** est un référentiel de compétences data qui permet de :
 - <span style='color:#002FA7;font-weight:600'>Évaluer</span> les compétences de vos collaborateurs via un questionnaire standardisé
 - <span style='color:#002FA7;font-weight:600'>Visualiser</span> la répartition des expertises grâce à un radar de compétences
 """, unsafe_allow_html=True)
+
+# Demo radar chart - showcase data profiles
+st.markdown("### <span style='color:#002FA7'>Visualisez</span> vos profils data", unsafe_allow_html=True)
+
+DEMO_DATA = [
+    {"profile": "Data Analyst", "Équipe Alpha": 85, "Équipe Beta": 65, "Équipe Gamma": 75},
+    {"profile": "Data Scientist", "Équipe Alpha": 70, "Équipe Beta": 90, "Équipe Gamma": 60},
+    {"profile": "Data Engineer", "Équipe Alpha": 60, "Équipe Beta": 75, "Équipe Gamma": 95},
+    {"profile": "ML Engineer", "Équipe Alpha": 55, "Équipe Beta": 85, "Équipe Gamma": 70},
+    {"profile": "Chef de Projet Data", "Équipe Alpha": 90, "Équipe Beta": 60, "Équipe Gamma": 80},
+    {"profile": "Data Architect", "Équipe Alpha": 50, "Équipe Beta": 70, "Équipe Gamma": 85},
+]
+
+with elements("demo_radar"):
+    nivo.Radar(
+        data=DEMO_DATA,
+        keys=["Équipe Alpha", "Équipe Beta", "Équipe Gamma"],
+        indexBy="profile",
+        maxValue=100,
+        margin={"top": 70, "right": 80, "bottom": 40, "left": 80},
+        curve="linearClosed",
+        borderWidth=2,
+        borderColor={"from": "color"},
+        gridLevels=5,
+        gridShape="circular",
+        gridLabelOffset=20,
+        enableDots=True,
+        dotSize=8,
+        dotColor={"theme": "background"},
+        dotBorderWidth=2,
+        dotBorderColor={"from": "color"},
+        colors=["#002FA7", "#4A90D9", "#7CB9E8"],
+        fillOpacity=0.25,
+        blendMode="multiply",
+        animate=True,
+        motionConfig="gentle",
+        legends=[
+            {
+                "anchor": "top-left",
+                "direction": "column",
+                "translateX": -50,
+                "translateY": -40,
+                "itemWidth": 100,
+                "itemHeight": 20,
+                "itemTextColor": "#1c1917",
+                "symbolSize": 12,
+                "symbolShape": "circle",
+            }
+        ],
+        theme={
+            "textColor": "#1c1917",
+            "fontSize": 12,
+            "grid": {"line": {"stroke": "#e7e5e4"}},
+        },
+        sx={"height": 500},
+    )
 
 st.divider()
 
