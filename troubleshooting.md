@@ -178,34 +178,5 @@ subdomain = "docs"
 
 ---
 
-### 9. Email Configuration for Results
-
-**Problem**: The "Envoyer mes résultats" button doesn't send email to participants.
-
-**Cause**: SMTP credentials are not configured.
-
-**Solution**:
-1. Add SMTP configuration to your secrets (local or Streamlit Cloud):
-
-```toml
-[smtp]
-server = "smtp.gmail.com"
-port = 587
-user = "your-email@gmail.com"
-password = "your-app-password"
-from_email = "your-email@gmail.com"
-```
-
-2. For Gmail, you need to create an **App Password**:
-   - Go to [Google Account Security](https://myaccount.google.com/security)
-   - Enable 2-Step Verification if not already enabled
-   - Go to App passwords
-   - Create a new app password for "Mail"
-   - Use this generated password in the config
-
-**Note**: If SMTP is not configured, results are still saved to Grist, but no email is sent. The user sees a warning message.
-
----
-
 ## Contact
 For issues not covered here, check the GitHub repository or raise an issue.

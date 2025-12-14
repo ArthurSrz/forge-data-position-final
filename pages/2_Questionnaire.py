@@ -6,9 +6,7 @@ Progressive disclosure questionnaire with adaptive profiling
 import pandas as pd
 import streamlit as st
 import requests
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 # Page configuration
 st.set_page_config(
@@ -72,130 +70,96 @@ def save_answers_to_grist(answers_list):
         return False
 
 
-def send_results_email(user_info, profile_results, selected_profiles):
-    """Send results email to participant."""
-    try:
-        # Get SMTP config from secrets
-        smtp_server = st.secrets.get("smtp", {}).get("server", "smtp.gmail.com")
-        smtp_port = st.secrets.get("smtp", {}).get("port", 587)
-        smtp_user = st.secrets.get("smtp", {}).get("user", "")
-        smtp_password = st.secrets.get("smtp", {}).get("password", "")
-        from_email = st.secrets.get("smtp", {}).get("from_email", smtp_user)
+def generate_results_markdown(user_info, profile_results, selected_profiles):
+    """Generate a colorful markdown file with results."""
+    qualified = [p for p, r in profile_results.items() if r.get('passed', False)]
+    date_str = datetime.now().strftime("%d/%m/%Y à %H:%M")
 
-        if not smtp_user or not smtp_password:
-            return False, "Configuration email manquante"
+    # Build markdown content
+    md = f"""# 🔥 La Forge à Data Position
+## Résultats de l'évaluation
 
-        # Calculate qualified profiles
-        qualified = [p for p, r in profile_results.items() if r.get('passed', False)]
-
-        # Build email content
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = "Vos résultats - La Forge à Data Position"
-        msg['From'] = from_email
-        msg['To'] = user_info['mail']
-
-        # Plain text version
-        text_content = f"""
-Bonjour {user_info['prenom']} {user_info['nom']},
-
-Merci d'avoir complété l'évaluation de compétences data !
-
-RÉSULTATS
----------
-Profils évalués : {len(selected_profiles)}
-Profils qualifiés : {len(qualified)}
-
-"""
-        for profile in selected_profiles:
-            results = profile_results.get(profile, {})
-            passed = results.get('passed', False)
-            status = "✓ QUALIFIÉ" if passed else "✗ Non qualifié"
-            text_content += f"\n{profile} - {status}\n"
-            for section in ['screening', 'expertise', 'mastery']:
-                if section in results:
-                    score = results[section] * 100
-                    text_content += f"  • {section.capitalize()}: {score:.0f}%\n"
-
-        text_content += """
 ---
-La Forge à Data Position
-Développé par Datactivist
+
+### 👤 Participant
+| | |
+|---|---|
+| **Nom** | {user_info['nom']} |
+| **Prénom** | {user_info['prenom']} |
+| **Email** | {user_info['mail']} |
+| **Date** | {date_str} |
+
+---
+
+### 📊 Synthèse
+
+| Métrique | Valeur |
+|----------|--------|
+| Profils évalués | **{len(selected_profiles)}** |
+| Profils qualifiés | **{len(qualified)}** |
+| Taux de réussite | **{len(qualified)*100//len(selected_profiles) if selected_profiles else 0}%** |
+
 """
 
-        # HTML version
-        html_content = f"""
-<html>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <div style="background-color: #1c3f4b; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">La Forge à Data Position</h1>
-    </div>
+    if qualified:
+        md += f"""
+> ✅ **Félicitations !** Vous êtes qualifié(e) pour : {', '.join(qualified)}
 
-    <div style="padding: 20px;">
-        <p>Bonjour <strong>{user_info['prenom']} {user_info['nom']}</strong>,</p>
+"""
+    else:
+        md += """
+> ⚠️ Aucun profil qualifié. N'hésitez pas à réessayer !
 
-        <p>Merci d'avoir complété l'évaluation de compétences data !</p>
-
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <h2 style="margin-top: 0;">📊 Vos Résultats</h2>
-            <p><strong>Profils évalués :</strong> {len(selected_profiles)}</p>
-            <p><strong>Profils qualifiés :</strong> {len(qualified)}</p>
-        </div>
 """
 
-        for profile in selected_profiles:
-            results = profile_results.get(profile, {})
-            passed = results.get('passed', False)
-            bg_color = "#d4edda" if passed else "#f8d7da"
-            status_text = "✓ QUALIFIÉ" if passed else "✗ Non qualifié"
+    md += """---
 
-            html_content += f"""
-        <div style="background-color: {bg_color}; padding: 15px; border-radius: 8px; margin: 10px 0;">
-            <h3 style="margin: 0 0 10px 0;">{profile}</h3>
-            <p style="margin: 0; font-weight: bold;">{status_text}</p>
-            <table style="width: 100%; margin-top: 10px;">
-"""
-            for section in ['screening', 'expertise', 'mastery']:
-                if section in results:
-                    score = results[section] * 100
-                    bar_color = "#28a745" if score >= 75 else "#dc3545"
-                    html_content += f"""
-                <tr>
-                    <td style="width: 100px;">{section.capitalize()}</td>
-                    <td>
-                        <div style="background-color: #e9ecef; border-radius: 4px; height: 20px; width: 100%;">
-                            <div style="background-color: {bar_color}; width: {score}%; height: 100%; border-radius: 4px;"></div>
-                        </div>
-                    </td>
-                    <td style="width: 50px; text-align: right;">{score:.0f}%</td>
-                </tr>
-"""
-            html_content += """
-            </table>
-        </div>
+### 📋 Détail par profil
+
 """
 
-        html_content += """
-        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-        <p style="color: #666; font-size: 12px;">
-            La Forge à Data Position - Développé par Datactivist
-        </p>
-    </div>
-</body>
-</html>
+    section_icons = {'screening': '🔍', 'expertise': '💡', 'mastery': '🎓'}
+    section_names = {'screening': 'Screening', 'expertise': 'Expertise', 'mastery': 'Maîtrise'}
+
+    for profile in selected_profiles:
+        results = profile_results.get(profile, {})
+        passed = results.get('passed', False)
+        status_badge = "✅ QUALIFIÉ" if passed else "❌ Non qualifié"
+
+        md += f"""
+#### {'🏆' if passed else '📌'} {profile}
+
+**Statut : {status_badge}**
+
+| Section | Score | Résultat |
+|---------|-------|----------|
 """
 
-        msg.attach(MIMEText(text_content, 'plain'))
-        msg.attach(MIMEText(html_content, 'html'))
+        for section in ['screening', 'expertise', 'mastery']:
+            if section in results:
+                score = results[section] * 100
+                icon = section_icons[section]
+                name = section_names[section]
+                bar = "🟩" * int(score // 10) + "⬜" * (10 - int(score // 10))
+                result = "✅ Réussi" if score >= 75 else "❌ < 75%"
+                md += f"| {icon} {name} | {bar} **{score:.0f}%** | {result} |\n"
 
-        # Send email
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_password)
-            server.send_message(msg)
+        md += "\n"
 
-        return True, "Email envoyé"
-    except Exception as e:
-        return False, str(e)
+    md += """---
+
+### ℹ️ À propos
+
+Cette évaluation a été réalisée via **La Forge à Data Position**, un outil développé par [Datactivist](https://datactivist.coop).
+
+Le seuil de qualification est de **75%** par section. Pour être qualifié sur un profil, il faut réussir toutes les sections (Screening → Expertise → Maîtrise).
+
+---
+
+*Document généré automatiquement*
+"""
+
+    return md
 
 
 def calculate_section_score(answers, questions_df, profile, section_type):
@@ -227,9 +191,7 @@ defaults = {
     'current_section': 'screening',
     'answers': {},
     'profile_results': {},  # {profile: {'screening': score, 'expertise': score, 'mastery': score, 'passed': bool}}
-    'submitted': False,
-    'email_sent': False,
-    'email_error': None
+    'submitted': False
 }
 for key, value in defaults.items():
     if key not in st.session_state:
@@ -514,7 +476,7 @@ elif st.session_state.step == 'results':
             st.rerun()
 
     with col2:
-        if st.button("✅ Envoyer mes résultats", type="primary"):
+        if st.button("✅ Enregistrer mes résultats", type="primary"):
             # Prepare answers for Grist
             final_answers = []
             for question, data in st.session_state.answers.items():
@@ -529,14 +491,6 @@ elif st.session_state.step == 'results':
                 })
 
             if save_answers_to_grist(final_answers):
-                # Try to send email with results
-                email_success, email_msg = send_results_email(
-                    st.session_state.user_info,
-                    st.session_state.profile_results,
-                    st.session_state.selected_profiles
-                )
-                st.session_state.email_sent = email_success
-                st.session_state.email_error = email_msg if not email_success else None
                 st.session_state.submitted = True
                 st.rerun()
             else:
@@ -551,12 +505,6 @@ elif st.session_state.submitted:
 
     st.success("Vos résultats ont été enregistrés avec succès.")
 
-    # Show email status
-    if st.session_state.email_sent:
-        st.info(f"📧 Un email récapitulatif a été envoyé à **{st.session_state.user_info['mail']}**")
-    elif st.session_state.email_error:
-        st.warning(f"📧 L'email n'a pas pu être envoyé ({st.session_state.email_error}). Vos résultats ont tout de même été enregistrés.")
-
     qualified = [p for p, r in st.session_state.profile_results.items() if r.get('passed', False)]
 
     st.markdown(f"""
@@ -569,7 +517,33 @@ elif st.session_state.submitted:
     Votre responsable pourra consulter vos résultats détaillés.
     """)
 
-    if st.button("Nouvelle évaluation"):
+    st.divider()
+
+    # Generate and offer markdown download
+    st.subheader("📥 Télécharger vos résultats")
+
+    results_md = generate_results_markdown(
+        st.session_state.user_info,
+        st.session_state.profile_results,
+        st.session_state.selected_profiles
+    )
+
+    filename = f"resultats_{st.session_state.user_info['nom']}_{st.session_state.user_info['prenom']}.md"
+    filename = filename.replace(" ", "_").lower()
+
+    st.download_button(
+        label="📄 Télécharger mes résultats (.md)",
+        data=results_md,
+        file_name=filename,
+        mime="text/markdown",
+        type="primary"
+    )
+
+    st.caption("Ce fichier contient le détail de vos scores par profil et par section.")
+
+    st.divider()
+
+    if st.button("🔄 Nouvelle évaluation"):
         for key in defaults:
             st.session_state[key] = defaults[key]
         st.rerun()
