@@ -1,12 +1,11 @@
 """
 Questionnaire Interface - La Forge à Data Position
-Clean, step-by-step questionnaire for collaborators
+Progressive disclosure questionnaire with adaptive profiling
 """
 
 import pandas as pd
 import streamlit as st
 import requests
-import numpy as np
 
 # Page configuration
 st.set_page_config(
@@ -16,24 +15,13 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
-# Custom CSS for better UX
+# Custom CSS
 st.markdown("""
 <style>
-    .stProgress > div > div > div > div {
-        background-color: #1c3f4b;
-    }
-    .question-card {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin: 10px 0;
-    }
-    .step-indicator {
-        text-align: center;
-        color: #666;
-        font-size: 14px;
-        margin-bottom: 20px;
-    }
+    .stProgress > div > div > div > div { background-color: #1c3f4b; }
+    .pass-badge { background-color: #28a745; color: white; padding: 5px 15px; border-radius: 20px; }
+    .fail-badge { background-color: #dc3545; color: white; padding: 5px 15px; border-radius: 20px; }
+    .score-display { font-size: 24px; font-weight: bold; text-align: center; padding: 20px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -44,6 +32,9 @@ st.components.v1.html("""
          style="max-width:100%;max-height:100%;" alt="La Forge Data Position">
 </div>
 """, height=140)
+
+# Constants
+PASS_THRESHOLD = 0.75  # 75% to pass a section
 
 # Load secrets
 DOC_ID = st.secrets["grist"]["doc_id"]
@@ -59,7 +50,6 @@ def load_grist_table(table_name):
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data = response.json()
-            # Ensure records key exists
             if 'records' not in data:
                 return {"records": []}, None
             return data, None
@@ -68,28 +58,51 @@ def load_grist_table(table_name):
         return {"records": []}, str(e)
 
 
-def add_answers_to_grist(answers_list, table_id="Form3"):
-    """Submit answers to Grist."""
+def save_answers_to_grist(answers_list):
+    """Save answers to Grist Form3."""
     try:
         records = [{"fields": a} for a in answers_list]
-        url = f"https://{subdomain}.getgrist.com/api/docs/{DOC_ID}/tables/{table_id}/records"
+        url = f"https://{subdomain}.getgrist.com/api/docs/{DOC_ID}/tables/Form3/records"
         response = requests.post(url, headers=headers, json={"records": records})
-        return response.status_code == 200, response.text
-    except Exception as e:
-        return False, str(e)
+        return response.status_code == 200
+    except:
+        return False
+
+
+def calculate_section_score(answers, questions_df, profile, section_type):
+    """Calculate score percentage for a section."""
+    section_questions = questions_df[
+        (questions_df['profile_type'] == profile) &
+        (questions_df['question_type'] == section_type)
+    ]['question'].unique()
+
+    if len(section_questions) == 0:
+        return 1.0  # No questions = auto-pass
+
+    total_score = 0
+    max_score = len(section_questions) * 4  # Max 4 points per question
+
+    for q in section_questions:
+        if q in answers:
+            total_score += answers[q]['score']
+
+    return total_score / max_score if max_score > 0 else 0
 
 
 # Initialize session state
-if 'step' not in st.session_state:
-    st.session_state.step = 0
-if 'user_info' not in st.session_state:
-    st.session_state.user_info = {}
-if 'selected_profile' not in st.session_state:
-    st.session_state.selected_profile = None
-if 'answers' not in st.session_state:
-    st.session_state.answers = {}
-if 'submitted' not in st.session_state:
-    st.session_state.submitted = False
+defaults = {
+    'step': 'welcome',
+    'user_info': {},
+    'selected_profiles': [],
+    'current_profile_idx': 0,
+    'current_section': 'screening',
+    'answers': {},
+    'profile_results': {},  # {profile: {'screening': score, 'expertise': score, 'mastery': score, 'passed': bool}}
+    'submitted': False
+}
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 # Load questions
 data2, error = load_grist_table("Form2")
@@ -107,24 +120,30 @@ questions_df.columns = [col.replace('fields_', '') for col in questions_df.colum
 
 # Get available profiles
 available_profiles = sorted(questions_df['profile_type'].dropna().unique())
+section_order = ['screening', 'expertise', 'mastery']
+section_labels = {'screening': '🔍 Screening', 'expertise': '💡 Expertise', 'mastery': '🎓 Maîtrise'}
 
 # =============================================================================
-# STEP 0: Welcome & User Info
+# WELCOME STEP
 # =============================================================================
-if st.session_state.step == 0:
+if st.session_state.step == 'welcome':
     st.title("Évaluez vos compétences data")
 
     st.markdown("""
-    Bienvenue ! Ce questionnaire permet d'évaluer vos compétences data
-    pour mieux positionner les talents de l'équipe.
+    Ce questionnaire adaptatif évalue vos compétences pour plusieurs profils data.
 
-    **Durée estimée** : 5-10 minutes
+    **Comment ça marche ?**
+    - Sélectionnez les profils qui vous intéressent
+    - Pour chaque profil, répondez aux questions par niveau (Screening → Expertise → Maîtrise)
+    - Si vous obtenez **75% ou plus** sur une section, vous passez à la suivante
+    - Sinon, le questionnaire passe au profil suivant
+
+    **Durée estimée** : 10-15 minutes
     """)
 
     st.divider()
 
     st.subheader("🧑 Vos informations")
-
     col1, col2 = st.columns(2)
     with col1:
         nom = st.text_input("Nom", value=st.session_state.user_info.get('nom', ''))
@@ -134,208 +153,278 @@ if st.session_state.step == 0:
 
     st.divider()
 
-    st.subheader("🎯 Votre profil data principal")
-    st.caption("Sélectionnez le profil qui correspond le mieux à votre activité")
+    st.subheader("🎯 Profils à évaluer")
+    st.caption("Sélectionnez un ou plusieurs profils (il est courant d'avoir des compétences dans plusieurs domaines)")
 
-    selected = st.radio(
-        "Profil",
+    selected = st.multiselect(
+        "Profils",
         available_profiles,
-        index=None,
+        default=st.session_state.selected_profiles or None,
         label_visibility="collapsed"
     )
 
     st.divider()
 
-    # Validation
-    can_proceed = nom and prenom and mail and selected
+    can_proceed = nom and prenom and mail and len(selected) > 0
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col3:
         if st.button("Commencer →", type="primary", disabled=not can_proceed):
             st.session_state.user_info = {'nom': nom, 'prenom': prenom, 'mail': mail}
-            st.session_state.selected_profile = selected
-            st.session_state.step = 1
+            st.session_state.selected_profiles = selected
+            st.session_state.current_profile_idx = 0
+            st.session_state.current_section = 'screening'
+            st.session_state.step = 'questions'
+            st.session_state.profile_results = {p: {} for p in selected}
             st.rerun()
 
     if not can_proceed:
-        st.info("Remplissez tous les champs et sélectionnez un profil pour continuer.")
+        st.info("Remplissez vos informations et sélectionnez au moins un profil.")
 
 # =============================================================================
-# STEP 1+: Questions by type
+# QUESTIONS STEP
 # =============================================================================
-elif not st.session_state.submitted:
-    # Filter questions for selected profile
-    profile_df = questions_df[questions_df['profile_type'] == st.session_state.selected_profile]
+elif st.session_state.step == 'questions':
+    profiles = st.session_state.selected_profiles
+    current_idx = st.session_state.current_profile_idx
+    current_section = st.session_state.current_section
 
-    # Group by question type
-    question_types = ['screening', 'expertise', 'mastery']
-    available_types = [qt for qt in question_types if qt in profile_df['question_type'].values]
+    # Check if we're done with all profiles
+    if current_idx >= len(profiles):
+        st.session_state.step = 'results'
+        st.rerun()
 
-    if not available_types:
-        st.error("Aucune question disponible pour ce profil.")
-        if st.button("← Retour"):
-            st.session_state.step = 0
-            st.rerun()
-        st.stop()
+    current_profile = profiles[current_idx]
 
-    # Calculate current question type index
-    type_index = st.session_state.step - 1
+    # Get questions for current profile and section
+    section_df = questions_df[
+        (questions_df['profile_type'] == current_profile) &
+        (questions_df['question_type'] == current_section)
+    ]
+    unique_questions = section_df['question'].unique()
 
-    if type_index >= len(available_types):
-        # All questions answered - show summary
-        st.title("📋 Récapitulatif")
+    # If no questions for this section, skip to next
+    if len(unique_questions) == 0:
+        # Auto-pass empty sections
+        st.session_state.profile_results[current_profile][current_section] = 1.0
 
-        st.success(f"Vous avez répondu à toutes les questions pour le profil **{st.session_state.selected_profile}**")
+        # Move to next section or profile
+        section_idx = section_order.index(current_section)
+        if section_idx < len(section_order) - 1:
+            st.session_state.current_section = section_order[section_idx + 1]
+        else:
+            st.session_state.profile_results[current_profile]['passed'] = True
+            st.session_state.current_profile_idx += 1
+            st.session_state.current_section = 'screening'
+        st.rerun()
 
-        # Show summary
-        st.subheader("Vos réponses")
-        for q_type in available_types:
-            type_label = {'screening': '🔍 Screening', 'expertise': '💡 Expertise', 'mastery': '🎓 Maîtrise'}.get(q_type, q_type)
-            st.markdown(f"**{type_label}**")
+    # Progress indicator
+    total_profiles = len(profiles)
+    total_sections = len(section_order)
+    section_idx = section_order.index(current_section)
+    overall_progress = (current_idx * total_sections + section_idx) / (total_profiles * total_sections)
 
-            type_questions = profile_df[profile_df['question_type'] == q_type]['question'].unique()
-            for q in type_questions:
-                if q in st.session_state.answers:
-                    ans = st.session_state.answers[q]
-                    st.markdown(f"- {q[:50]}... → Score: {ans['score']}")
+    st.progress(overall_progress)
+    st.caption(f"Profil {current_idx + 1}/{total_profiles} • Section {section_idx + 1}/{total_sections}")
+
+    st.title(f"{current_profile}")
+    st.subheader(f"{section_labels.get(current_section, current_section)}")
+
+    section_descriptions = {
+        'screening': "Questions générales pour évaluer votre familiarité avec ce domaine.",
+        'expertise': "Questions techniques pour évaluer vos compétences pratiques.",
+        'mastery': "Questions avancées pour évaluer votre niveau d'expertise."
+    }
+    st.caption(section_descriptions.get(current_section, ""))
+
+    st.divider()
+
+    # Display questions
+    all_answered = True
+    section_key = f"{current_profile}_{current_section}"
+
+    for i, question in enumerate(unique_questions):
+        st.markdown(f"**Question {i+1}/{len(unique_questions)}**")
+        st.markdown(f"*{question}*")
+
+        # Get possible answers sorted by score (highest first)
+        q_data = section_df[section_df['question'] == question].sort_values('score', ascending=False)
+        possible_answers = q_data['reponse'].tolist()
+        scores = q_data['score'].tolist()
+
+        # Get current answer if any
+        current_answer = st.session_state.answers.get(question, {}).get('reponse', None)
+        default_idx = possible_answers.index(current_answer) if current_answer in possible_answers else None
+
+        selected_answer = st.radio(
+            f"q_{section_key}_{i}",
+            possible_answers,
+            index=default_idx,
+            label_visibility="collapsed",
+            key=f"radio_{section_key}_{i}"
+        )
+
+        if selected_answer:
+            score_idx = possible_answers.index(selected_answer)
+            st.session_state.answers[question] = {
+                'reponse': selected_answer,
+                'score': scores[score_idx],
+                'profile': current_profile,
+                'section': current_section
+            }
+        else:
+            all_answered = False
 
         st.divider()
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("← Modifier mes réponses"):
-                st.session_state.step = 1
-                st.rerun()
-        with col2:
-            if st.button("✅ Envoyer mes réponses", type="primary"):
-                # Prepare final answers
-                final_answers = []
-                for question, data in st.session_state.answers.items():
-                    final_answers.append({
-                        'nom': st.session_state.user_info['nom'],
-                        'prenom': st.session_state.user_info['prenom'],
-                        'mail': st.session_state.user_info['mail'],
-                        'question': question,
-                        'reponse': data['reponse'],
-                        'score': data['score'],
-                        'profile_type': st.session_state.selected_profile
-                    })
+    # Navigation
+    col1, col2, col3 = st.columns([1, 1, 1])
 
-                with st.spinner("Envoi en cours..."):
-                    success, msg = add_answers_to_grist(final_answers)
-
-                if success:
-                    st.session_state.submitted = True
-                    st.rerun()
-                else:
-                    st.error(f"Erreur: {msg}")
-    else:
-        # Show questions for current type
-        current_type = available_types[type_index]
-        type_questions = profile_df[profile_df['question_type'] == current_type]
-        unique_questions = type_questions['question'].unique()
-
-        # Header with progress
-        type_labels = {'screening': 'Screening', 'expertise': 'Expertise', 'mastery': 'Maîtrise'}
-        type_icons = {'screening': '🔍', 'expertise': '💡', 'mastery': '🎓'}
-
-        progress = (type_index) / len(available_types)
-        st.progress(progress)
-        st.markdown(f"<div class='step-indicator'>Étape {type_index + 1}/{len(available_types)} • {st.session_state.selected_profile}</div>", unsafe_allow_html=True)
-
-        st.title(f"{type_icons.get(current_type, '📝')} {type_labels.get(current_type, current_type)}")
-
-        # Type description
-        type_descriptions = {
-            'screening': "Ces questions permettent d'évaluer votre niveau général dans ce domaine.",
-            'expertise': "Ces questions évaluent vos compétences techniques spécifiques.",
-            'mastery': "Ces questions mesurent votre niveau de maîtrise avancée."
-        }
-        st.caption(type_descriptions.get(current_type, ""))
-
-        st.divider()
-
-        # Questions
-        all_answered = True
-        for i, question in enumerate(unique_questions):
-            st.markdown(f"**Question {i+1}/{len(unique_questions)}**")
-            st.markdown(f"*{question}*")
-
-            # Get possible answers sorted by score (descending)
-            q_data = type_questions[type_questions['question'] == question].sort_values('score', ascending=False)
-            possible_answers = q_data['reponse'].tolist()
-            scores = q_data['score'].tolist()
-
-            # Create answer options with score indicators
-            current_answer = st.session_state.answers.get(question, {}).get('reponse', None)
-
-            # Find index of current answer
-            default_idx = None
-            if current_answer in possible_answers:
-                default_idx = possible_answers.index(current_answer)
-
-            selected_answer = st.radio(
-                f"q_{i}",
-                possible_answers,
-                index=default_idx,
-                label_visibility="collapsed",
-                key=f"{current_type}_{i}"
+    with col3:
+        if st.button("Valider cette section →", type="primary", disabled=not all_answered):
+            # Calculate score for this section
+            score_pct = calculate_section_score(
+                st.session_state.answers, questions_df, current_profile, current_section
             )
+            st.session_state.profile_results[current_profile][current_section] = score_pct
 
-            if selected_answer:
-                # Save answer
-                score_idx = possible_answers.index(selected_answer)
-                st.session_state.answers[question] = {
-                    'reponse': selected_answer,
-                    'score': scores[score_idx]
-                }
+            passed = score_pct >= PASS_THRESHOLD
+
+            if passed:
+                # Move to next section
+                if section_idx < len(section_order) - 1:
+                    st.session_state.current_section = section_order[section_idx + 1]
+                else:
+                    # Completed all sections for this profile
+                    st.session_state.profile_results[current_profile]['passed'] = True
+                    st.session_state.current_profile_idx += 1
+                    st.session_state.current_section = 'screening'
             else:
-                all_answered = False
+                # Failed - move to next profile
+                st.session_state.profile_results[current_profile]['passed'] = False
+                st.session_state.current_profile_idx += 1
+                st.session_state.current_section = 'screening'
 
-            st.divider()
+            st.rerun()
 
-        # Navigation
-        col1, col2, col3 = st.columns([1, 1, 1])
+    if not all_answered:
+        st.warning("Répondez à toutes les questions pour continuer.")
 
-        with col1:
-            if type_index > 0:
-                if st.button("← Précédent"):
-                    st.session_state.step -= 1
-                    st.rerun()
+    # Show current section progress
+    with st.expander("📊 Votre progression"):
+        for profile in profiles[:current_idx + 1]:
+            results = st.session_state.profile_results.get(profile, {})
+            if results:
+                st.markdown(f"**{profile}**")
+                for section in section_order:
+                    if section in results:
+                        score = results[section]
+                        status = "✅" if score >= PASS_THRESHOLD else "❌"
+                        st.write(f"  {section_labels[section]}: {score*100:.0f}% {status}")
 
-        with col3:
-            btn_label = "Suivant →" if type_index < len(available_types) - 1 else "Voir le récapitulatif →"
-            if st.button(btn_label, type="primary", disabled=not all_answered):
-                st.session_state.step += 1
+# =============================================================================
+# RESULTS STEP
+# =============================================================================
+elif st.session_state.step == 'results':
+    st.title("📊 Résultats de votre évaluation")
+
+    # Calculate qualified profiles
+    qualified_profiles = []
+    for profile, results in st.session_state.profile_results.items():
+        if results.get('passed', False):
+            qualified_profiles.append(profile)
+
+    if qualified_profiles:
+        st.success(f"🎉 Félicitations ! Vous êtes qualifié(e) pour **{len(qualified_profiles)}** profil(s) data.")
+    else:
+        st.info("Vous n'avez pas atteint le seuil de 75% pour les profils évalués. N'hésitez pas à réessayer !")
+
+    st.divider()
+
+    # Detailed results
+    st.subheader("Détail par profil")
+
+    for profile in st.session_state.selected_profiles:
+        results = st.session_state.profile_results.get(profile, {})
+        passed = results.get('passed', False)
+
+        with st.expander(f"{'✅' if passed else '❌'} {profile}", expanded=True):
+            cols = st.columns(3)
+            for i, section in enumerate(section_order):
+                with cols[i]:
+                    score = results.get(section, 0)
+                    st.metric(
+                        section_labels[section],
+                        f"{score*100:.0f}%",
+                        delta="Réussi" if score >= PASS_THRESHOLD else "Non atteint"
+                    )
+
+            if passed:
+                st.success("Profil validé ! Toutes les sections complétées avec succès.")
+            elif any(section in results for section in section_order):
+                failed_section = None
+                for section in section_order:
+                    if section in results and results[section] < PASS_THRESHOLD:
+                        failed_section = section
+                        break
+                if failed_section:
+                    st.warning(f"Évaluation arrêtée à la section {section_labels[failed_section]} (score < 75%)")
+
+    st.divider()
+
+    # Submit results
+    st.subheader("Enregistrer vos résultats")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("← Recommencer"):
+            for key in defaults:
+                st.session_state[key] = defaults[key]
+            st.rerun()
+
+    with col2:
+        if st.button("✅ Envoyer mes résultats", type="primary"):
+            # Prepare answers for Grist
+            final_answers = []
+            for question, data in st.session_state.answers.items():
+                final_answers.append({
+                    'nom': st.session_state.user_info['nom'],
+                    'prenom': st.session_state.user_info['prenom'],
+                    'mail': st.session_state.user_info['mail'],
+                    'question': question,
+                    'reponse': data['reponse'],
+                    'score': data['score'],
+                    'profile_type': data['profile']
+                })
+
+            if save_answers_to_grist(final_answers):
+                st.session_state.submitted = True
                 st.rerun()
-
-        if not all_answered:
-            st.warning("Répondez à toutes les questions pour continuer.")
+            else:
+                st.error("Erreur lors de l'enregistrement. Veuillez réessayer.")
 
 # =============================================================================
-# SUBMITTED: Thank you page
+# SUBMITTED
 # =============================================================================
-else:
+elif st.session_state.submitted:
     st.balloons()
-
     st.title("🎉 Merci !")
 
-    st.success("Vos réponses ont été enregistrées avec succès.")
+    st.success("Vos résultats ont été enregistrés avec succès.")
+
+    qualified = [p for p, r in st.session_state.profile_results.items() if r.get('passed', False)]
 
     st.markdown(f"""
     ### Récapitulatif
 
     - **Nom** : {st.session_state.user_info['nom']} {st.session_state.user_info['prenom']}
-    - **Profil évalué** : {st.session_state.selected_profile}
-    - **Questions répondues** : {len(st.session_state.answers)}
+    - **Profils évalués** : {len(st.session_state.selected_profiles)}
+    - **Profils qualifiés** : {len(qualified)} ({', '.join(qualified) if qualified else 'Aucun'})
 
-    Votre responsable pourra visualiser vos résultats dans le radar de compétences.
+    Votre responsable pourra consulter vos résultats détaillés.
     """)
 
-    if st.button("Recommencer avec un autre profil"):
-        # Reset state
-        st.session_state.step = 0
-        st.session_state.answers = {}
-        st.session_state.submitted = False
-        st.session_state.selected_profile = None
+    if st.button("Nouvelle évaluation"):
+        for key in defaults:
+            st.session_state[key] = defaults[key]
         st.rerun()
