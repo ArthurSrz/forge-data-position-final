@@ -20,13 +20,64 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
-# Inject custom styles (hide sidebar for candidates)
+# Inject custom styles (hide sidebar)
 inject_styles(hide_sidebar=True)
 
-# Small logo at top
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.image("resource/logo_forge.png", use_container_width=True)
+# Top navigation bar (minimal for questionnaire - just logo)
+st.markdown("""
+<style>
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e7e5e4;
+    margin-bottom: 2rem;
+}
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.nav-logo img {
+    height: 40px;
+}
+.nav-brand {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1c1917;
+}
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+.nav-link {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #002FA7;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 2px solid #002FA7;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.nav-link.active {
+    background: #002FA7;
+    color: white;
+}
+</style>
+<div class="top-nav">
+    <div class="nav-logo">
+        <img src="https://raw.githubusercontent.com/ArthurSrz/forge-data-position-final/main/resource/logo_forge.png" alt="Logo">
+        <span class="nav-brand">Data Position Studio</span>
+    </div>
+    <div class="nav-links">
+        <span class="nav-link active">Questionnaire</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Constants
 PASS_THRESHOLD = 0.75  # 75% to pass a section

@@ -13,11 +13,72 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
-# Inject custom styles
-inject_styles()
+# Inject custom styles (hide sidebar)
+inject_styles(hide_sidebar=True)
 
-# Classic logo at top left
-st.image("resource/logo_forge.png", width=120)
+# Top navigation bar
+st.markdown("""
+<style>
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e7e5e4;
+    margin-bottom: 2rem;
+}
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.nav-logo img {
+    height: 40px;
+}
+.nav-brand {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1c1917;
+}
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+.nav-link {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #002FA7;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 2px solid #002FA7;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.nav-link:hover {
+    background: #002FA7;
+    color: white;
+}
+.nav-link.primary {
+    background: #002FA7;
+    color: white;
+}
+.nav-link.primary:hover {
+    background: #001d6e;
+}
+</style>
+<div class="top-nav">
+    <div class="nav-logo">
+        <img src="https://raw.githubusercontent.com/ArthurSrz/forge-data-position-final/main/resource/logo_forge.png" alt="Logo">
+        <span class="nav-brand">Data Position Studio</span>
+    </div>
+    <div class="nav-links">
+        <a href="/Admin" class="nav-link" target="_self">Admin</a>
+        <a href="/Questionnaire" class="nav-link primary" target="_self">Questionnaire</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("# Composez votre <span style='color:#002FA7'>Dream Team</span> Data", unsafe_allow_html=True)
 st.markdown("<p style='color:#57534e;font-size:16px;margin-top:-10px;'>L'outil de cartographie des compétences pour les Chief Data Officers et Heads of Data</p>", unsafe_allow_html=True)

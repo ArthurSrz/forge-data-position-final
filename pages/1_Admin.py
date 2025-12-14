@@ -22,12 +22,71 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
-# Inject custom styles
-inject_styles()
+# Inject custom styles (hide sidebar)
+inject_styles(hide_sidebar=True)
 
-# Logo in sidebar
-with st.sidebar:
-    st.image("resource/logo_forge.png", use_container_width=True)
+# Top navigation bar
+st.markdown("""
+<style>
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e7e5e4;
+    margin-bottom: 2rem;
+}
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.nav-logo img {
+    height: 40px;
+}
+.nav-brand {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1c1917;
+}
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+.nav-link {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #002FA7;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 2px solid #002FA7;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.nav-link:hover {
+    background: #002FA7;
+    color: white;
+}
+.nav-link.active {
+    background: #002FA7;
+    color: white;
+}
+</style>
+<div class="top-nav">
+    <div class="nav-logo">
+        <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+            <img src="https://raw.githubusercontent.com/ArthurSrz/forge-data-position-final/main/resource/logo_forge.png" alt="Logo">
+            <span class="nav-brand">Data Position Studio</span>
+        </a>
+    </div>
+    <div class="nav-links">
+        <a href="/Admin" class="nav-link active" target="_self">Admin</a>
+        <a href="/Questionnaire" class="nav-link" target="_self">Questionnaire</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Load secrets
 SERVER = st.secrets["grist"]["server"]
