@@ -16,9 +16,15 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
-# Custom CSS
+# Custom CSS - Hide sidebar completely for candidates
 st.markdown("""
 <style>
+    /* Hide sidebar */
+    [data-testid="stSidebar"] { display: none; }
+    [data-testid="stSidebarNav"] { display: none; }
+    [data-testid="collapsedControl"] { display: none; }
+
+    /* Custom styles */
     .stProgress > div > div > div > div { background-color: #1c3f4b; }
     .pass-badge { background-color: #28a745; color: white; padding: 5px 15px; border-radius: 20px; }
     .fail-badge { background-color: #dc3545; color: white; padding: 5px 15px; border-radius: 20px; }
