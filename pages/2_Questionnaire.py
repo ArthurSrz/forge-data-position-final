@@ -6,6 +6,9 @@ Progressive disclosure questionnaire with adaptive profiling
 import pandas as pd
 import streamlit as st
 import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Page configuration
 st.set_page_config(
@@ -69,6 +72,132 @@ def save_answers_to_grist(answers_list):
         return False
 
 
+def send_results_email(user_info, profile_results, selected_profiles):
+    """Send results email to participant."""
+    try:
+        # Get SMTP config from secrets
+        smtp_server = st.secrets.get("smtp", {}).get("server", "smtp.gmail.com")
+        smtp_port = st.secrets.get("smtp", {}).get("port", 587)
+        smtp_user = st.secrets.get("smtp", {}).get("user", "")
+        smtp_password = st.secrets.get("smtp", {}).get("password", "")
+        from_email = st.secrets.get("smtp", {}).get("from_email", smtp_user)
+
+        if not smtp_user or not smtp_password:
+            return False, "Configuration email manquante"
+
+        # Calculate qualified profiles
+        qualified = [p for p, r in profile_results.items() if r.get('passed', False)]
+
+        # Build email content
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = "Vos résultats - La Forge à Data Position"
+        msg['From'] = from_email
+        msg['To'] = user_info['mail']
+
+        # Plain text version
+        text_content = f"""
+Bonjour {user_info['prenom']} {user_info['nom']},
+
+Merci d'avoir complété l'évaluation de compétences data !
+
+RÉSULTATS
+---------
+Profils évalués : {len(selected_profiles)}
+Profils qualifiés : {len(qualified)}
+
+"""
+        for profile in selected_profiles:
+            results = profile_results.get(profile, {})
+            passed = results.get('passed', False)
+            status = "✓ QUALIFIÉ" if passed else "✗ Non qualifié"
+            text_content += f"\n{profile} - {status}\n"
+            for section in ['screening', 'expertise', 'mastery']:
+                if section in results:
+                    score = results[section] * 100
+                    text_content += f"  • {section.capitalize()}: {score:.0f}%\n"
+
+        text_content += """
+---
+La Forge à Data Position
+Développé par Datactivist
+"""
+
+        # HTML version
+        html_content = f"""
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #1c3f4b; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">La Forge à Data Position</h1>
+    </div>
+
+    <div style="padding: 20px;">
+        <p>Bonjour <strong>{user_info['prenom']} {user_info['nom']}</strong>,</p>
+
+        <p>Merci d'avoir complété l'évaluation de compétences data !</p>
+
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h2 style="margin-top: 0;">📊 Vos Résultats</h2>
+            <p><strong>Profils évalués :</strong> {len(selected_profiles)}</p>
+            <p><strong>Profils qualifiés :</strong> {len(qualified)}</p>
+        </div>
+"""
+
+        for profile in selected_profiles:
+            results = profile_results.get(profile, {})
+            passed = results.get('passed', False)
+            bg_color = "#d4edda" if passed else "#f8d7da"
+            status_text = "✓ QUALIFIÉ" if passed else "✗ Non qualifié"
+
+            html_content += f"""
+        <div style="background-color: {bg_color}; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <h3 style="margin: 0 0 10px 0;">{profile}</h3>
+            <p style="margin: 0; font-weight: bold;">{status_text}</p>
+            <table style="width: 100%; margin-top: 10px;">
+"""
+            for section in ['screening', 'expertise', 'mastery']:
+                if section in results:
+                    score = results[section] * 100
+                    bar_color = "#28a745" if score >= 75 else "#dc3545"
+                    html_content += f"""
+                <tr>
+                    <td style="width: 100px;">{section.capitalize()}</td>
+                    <td>
+                        <div style="background-color: #e9ecef; border-radius: 4px; height: 20px; width: 100%;">
+                            <div style="background-color: {bar_color}; width: {score}%; height: 100%; border-radius: 4px;"></div>
+                        </div>
+                    </td>
+                    <td style="width: 50px; text-align: right;">{score:.0f}%</td>
+                </tr>
+"""
+            html_content += """
+            </table>
+        </div>
+"""
+
+        html_content += """
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="color: #666; font-size: 12px;">
+            La Forge à Data Position - Développé par Datactivist
+        </p>
+    </div>
+</body>
+</html>
+"""
+
+        msg.attach(MIMEText(text_content, 'plain'))
+        msg.attach(MIMEText(html_content, 'html'))
+
+        # Send email
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.send_message(msg)
+
+        return True, "Email envoyé"
+    except Exception as e:
+        return False, str(e)
+
+
 def calculate_section_score(answers, questions_df, profile, section_type):
     """Calculate score percentage for a section."""
     section_questions = questions_df[
@@ -98,7 +227,9 @@ defaults = {
     'current_section': 'screening',
     'answers': {},
     'profile_results': {},  # {profile: {'screening': score, 'expertise': score, 'mastery': score, 'passed': bool}}
-    'submitted': False
+    'submitted': False,
+    'email_sent': False,
+    'email_error': None
 }
 for key, value in defaults.items():
     if key not in st.session_state:
@@ -398,6 +529,14 @@ elif st.session_state.step == 'results':
                 })
 
             if save_answers_to_grist(final_answers):
+                # Try to send email with results
+                email_success, email_msg = send_results_email(
+                    st.session_state.user_info,
+                    st.session_state.profile_results,
+                    st.session_state.selected_profiles
+                )
+                st.session_state.email_sent = email_success
+                st.session_state.email_error = email_msg if not email_success else None
                 st.session_state.submitted = True
                 st.rerun()
             else:
@@ -411,6 +550,12 @@ elif st.session_state.submitted:
     st.title("🎉 Merci !")
 
     st.success("Vos résultats ont été enregistrés avec succès.")
+
+    # Show email status
+    if st.session_state.email_sent:
+        st.info(f"📧 Un email récapitulatif a été envoyé à **{st.session_state.user_info['mail']}**")
+    elif st.session_state.email_error:
+        st.warning(f"📧 L'email n'a pas pu être envoyé ({st.session_state.email_error}). Vos résultats ont tout de même été enregistrés.")
 
     qualified = [p for p, r in st.session_state.profile_results.items() if r.get('passed', False)]
 
