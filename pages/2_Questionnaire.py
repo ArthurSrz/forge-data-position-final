@@ -23,11 +23,11 @@ st.set_page_config(
 # Inject custom styles (hide sidebar for candidates)
 inject_styles(hide_sidebar=True)
 
-# Banner
+# Banner - seamless integration
 st.components.v1.html("""
-<div style="width:100%;height:120px;display:flex;justify-content:center;align-items:center;padding:10px;background:#fafaf9;">
+<div style="width:100%;height:120px;display:flex;justify-content:center;align-items:center;padding:10px;background:transparent;">
     <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true&v=2"
-         style="max-width:100%;max-height:100%;" alt="La Forge Data Position">
+         style="max-width:100%;max-height:100%;background:transparent;" alt="La Forge Data Position">
 </div>
 """, height=140)
 
