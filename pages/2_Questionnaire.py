@@ -58,7 +58,11 @@ def load_grist_table(table_name):
     try:
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            return response.json(), None
+            data = response.json()
+            # Ensure records key exists
+            if 'records' not in data:
+                return {"records": []}, None
+            return data, None
         return {"records": []}, f"Erreur {response.status_code}"
     except Exception as e:
         return {"records": []}, str(e)
