@@ -25,10 +25,8 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Banner - large logo centered
-col1, col2, col3 = st.columns([1, 5, 1])
-with col2:
-    st.image("resource/logo_forge.png", use_container_width=True)
+# Banner - full width logo
+st.image("resource/logo_forge.png", use_container_width=True)
 
 # Load secrets
 SERVER = st.secrets["grist"]["server"]
