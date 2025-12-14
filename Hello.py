@@ -19,59 +19,59 @@ inject_styles()
 # Banner - full width logo
 st.image("resource/logo_forge.png", use_container_width=True)
 
-st.title("Bienvenue sur La Forge à Data Position")
+st.markdown("# Bienvenue sur <span style='color:#002FA7'>La Forge</span> à Data Position", unsafe_allow_html=True)
 
 st.markdown("""
-### Qu'est-ce qu'un Data Position ?
+### Qu'est-ce qu'un <span style='color:#002FA7'>Data Position</span> ?
 
 Un **Data Position** est un référentiel de compétences data qui permet de :
 
-- **Cartographier les profils data** de votre organisation (Data Analyst, Data Scientist, ML Engineer, etc.)
-- **Évaluer les compétences** de vos collaborateurs via un questionnaire standardisé
-- **Visualiser la répartition** des expertises grâce à un radar de compétences
-""")
+- <span style='color:#002FA7;font-weight:600'>Cartographier</span> les profils data de votre organisation (Data Analyst, Data Scientist, ML Engineer, etc.)
+- <span style='color:#002FA7;font-weight:600'>Évaluer</span> les compétences de vos collaborateurs via un questionnaire standardisé
+- <span style='color:#002FA7;font-weight:600'>Visualiser</span> la répartition des expertises grâce à un radar de compétences
+""", unsafe_allow_html=True)
 
 st.divider()
 
-st.markdown("### Choisissez votre interface")
+st.markdown("### Choisissez votre <span style='color:#002FA7'>interface</span>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     with st.container(border=True):
         st.markdown("""
-        #### Admin
+        #### <span style='color:#002FA7'>Admin</span>
         **Pour les responsables data**
 
         - Créer et configurer un Data Position
         - Sélectionner les profils à évaluer
         - Visualiser les résultats (radar chart)
         - Analyser la répartition des compétences
-        """)
+        """, unsafe_allow_html=True)
         st.page_link("pages/1_Admin.py", label="Ouvrir l'interface Admin", icon="⚙️")
 
 with col2:
     with st.container(border=True):
         st.markdown("""
-        #### Questionnaire
+        #### <span style='color:#002FA7'>Questionnaire</span>
         **Pour les collaborateurs**
 
         - Remplir le questionnaire d'évaluation
         - Auto-évaluer ses compétences data
         - Contribuer à la cartographie de l'équipe
-        """)
+        """, unsafe_allow_html=True)
         st.page_link("pages/2_Questionnaire.py", label="Ouvrir le Questionnaire", icon="📝")
 
 st.divider()
 
 st.markdown("""
-### Comment ça marche ?
+### Comment ça <span style='color:#002FA7'>marche</span> ?
 
-1. **Le responsable** crée un Data Position dans l'interface Admin
-2. **Le responsable** partage le lien du Questionnaire avec son équipe
+1. **Le responsable** crée un Data Position dans l'interface <span style='color:#002FA7'>Admin</span>
+2. **Le responsable** partage le lien du <span style='color:#002FA7'>Questionnaire</span> avec son équipe
 3. **Les collaborateurs** remplissent le questionnaire
-4. **Le responsable** visualise les résultats dans l'onglet Position
-""")
+4. **Le responsable** visualise les <span style='color:#002FA7'>résultats</span> dans l'onglet Position
+""", unsafe_allow_html=True)
 
 st.divider()
 
