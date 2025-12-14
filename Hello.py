@@ -10,135 +10,136 @@ st.set_page_config(
     page_title="La Forge à Data Position",
     page_icon="🔥",
     layout='wide',
-    initial_sidebar_state='expanded'
+    initial_sidebar_state='collapsed'
 )
 
 # Inject custom styles
 inject_styles()
 
-# Logo in sidebar at top
-with st.sidebar:
-    st.image("resource/logo_forge.png", use_container_width=True)
+# Logo at top left
+col_logo, col_spacer = st.columns([1, 4])
+with col_logo:
+    st.image("resource/logo_forge.png", width=150)
 
-st.markdown("# Bienvenue sur <span style='color:#002FA7'>La Forge</span> à Data Position", unsafe_allow_html=True)
+st.markdown("# Composez votre <span style='color:#002FA7'>Dream Team</span> Data", unsafe_allow_html=True)
+st.markdown("### <span style='color:#57534e'>L'outil de cartographie des compétences pour les Chief Data Officers</span>", unsafe_allow_html=True)
 
-st.markdown("""
-### Qu'est-ce qu'un <span style='color:#002FA7'>Data Position</span> ?
-
-Un **Data Position** est un référentiel de compétences data qui permet de :
-
-- <span style='color:#002FA7;font-weight:600'>Cartographier</span> les profils data de votre organisation
-- <span style='color:#002FA7;font-weight:600'>Évaluer</span> les compétences de vos collaborateurs
-- <span style='color:#002FA7;font-weight:600'>Visualiser</span> la répartition des expertises
-""", unsafe_allow_html=True)
-
-# Animated radar chart - "Perfect Team" visualization
-st.markdown("### <span style='color:#002FA7'>L'équipe data idéale</span>", unsafe_allow_html=True)
-
+# Animated radar with overlapping team members
 ANIMATED_RADAR_HTML = """
 <div style="display:flex;justify-content:center;align-items:center;padding:20px;">
-<svg viewBox="0 0 500 500" width="100%" style="max-width:600px;max-height:500px;">
+<svg viewBox="0 0 600 550" width="100%" style="max-width:700px;">
   <defs>
     <style>
       .grid-line { stroke: #e7e5e4; stroke-width: 1; fill: none; }
       .axis-line { stroke: #e7e5e4; stroke-width: 1; }
-      .label { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #1c1917; }
-      .team-area { fill: #002FA7; fill-opacity: 0; stroke: #002FA7; stroke-width: 2; }
-      .dot { fill: #002FA7; opacity: 0; }
-      .legend { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; fill: #1c1917; }
+      .label { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; fill: #1c1917; font-weight: 600; }
+      .legend-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #1c1917; }
 
-      /* Animation keyframes */
-      @keyframes fillIn {
+      /* Team member areas with different colors */
+      .member-a { fill: #002FA7; stroke: #002FA7; stroke-width: 2; }
+      .member-b { fill: #E63946; stroke: #E63946; stroke-width: 2; }
+      .member-c { fill: #2A9D8F; stroke: #2A9D8F; stroke-width: 2; }
+      .member-d { fill: #F4A261; stroke: #F4A261; stroke-width: 2; }
+      .member-e { fill: #9B5DE5; stroke: #9B5DE5; stroke-width: 2; }
+      .member-f { fill: #00B4D8; stroke: #00B4D8; stroke-width: 2; }
+
+      /* Animation */
+      @keyframes drawMember {
+        0% { opacity: 0; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      @keyframes fillMember {
         0% { fill-opacity: 0; }
-        100% { fill-opacity: 0.3; }
-      }
-      @keyframes drawPath {
-        0% { stroke-dashoffset: 1000; }
-        100% { stroke-dashoffset: 0; }
-      }
-      @keyframes fadeIn {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-      }
-      @keyframes pulse {
-        0%, 100% { r: 6; }
-        50% { r: 8; }
+        100% { fill-opacity: 0.25; }
       }
 
-      .team-area {
-        stroke-dasharray: 1000;
-        stroke-dashoffset: 1000;
-        animation: drawPath 2s ease-out forwards, fillIn 1s ease-out 1.5s forwards;
+      .team-member {
+        transform-origin: 300px 270px;
+        opacity: 0;
+        fill-opacity: 0;
       }
-      .dot {
-        animation: fadeIn 0.5s ease-out forwards, pulse 2s ease-in-out infinite;
-      }
-      .dot:nth-child(1) { animation-delay: 0.5s, 2.5s; }
-      .dot:nth-child(2) { animation-delay: 0.7s, 2.7s; }
-      .dot:nth-child(3) { animation-delay: 0.9s, 2.9s; }
-      .dot:nth-child(4) { animation-delay: 1.1s, 3.1s; }
-      .dot:nth-child(5) { animation-delay: 1.3s, 3.3s; }
-      .dot:nth-child(6) { animation-delay: 1.5s, 3.5s; }
+      .member-a { animation: drawMember 0.6s ease-out 0.2s forwards, fillMember 0.4s ease-out 0.6s forwards; }
+      .member-b { animation: drawMember 0.6s ease-out 0.5s forwards, fillMember 0.4s ease-out 0.9s forwards; }
+      .member-c { animation: drawMember 0.6s ease-out 0.8s forwards, fillMember 0.4s ease-out 1.2s forwards; }
+      .member-d { animation: drawMember 0.6s ease-out 1.1s forwards, fillMember 0.4s ease-out 1.5s forwards; }
+      .member-e { animation: drawMember 0.6s ease-out 1.4s forwards, fillMember 0.4s ease-out 1.8s forwards; }
+      .member-f { animation: drawMember 0.6s ease-out 1.7s forwards, fillMember 0.4s ease-out 2.1s forwards; }
     </style>
   </defs>
 
   <!-- Grid circles -->
-  <circle cx="250" cy="250" r="40" class="grid-line"/>
-  <circle cx="250" cy="250" r="80" class="grid-line"/>
-  <circle cx="250" cy="250" r="120" class="grid-line"/>
-  <circle cx="250" cy="250" r="160" class="grid-line"/>
-  <circle cx="250" cy="250" r="200" class="grid-line"/>
+  <circle cx="300" cy="270" r="40" class="grid-line"/>
+  <circle cx="300" cy="270" r="80" class="grid-line"/>
+  <circle cx="300" cy="270" r="120" class="grid-line"/>
+  <circle cx="300" cy="270" r="160" class="grid-line"/>
+  <circle cx="300" cy="270" r="200" class="grid-line"/>
 
-  <!-- Axis lines (6 axes for 6 profiles) -->
-  <line x1="250" y1="250" x2="250" y2="50" class="axis-line"/>
-  <line x1="250" y1="250" x2="423" y2="150" class="axis-line"/>
-  <line x1="250" y1="250" x2="423" y2="350" class="axis-line"/>
-  <line x1="250" y1="250" x2="250" y2="450" class="axis-line"/>
-  <line x1="250" y1="250" x2="77" y2="350" class="axis-line"/>
-  <line x1="250" y1="250" x2="77" y2="150" class="axis-line"/>
+  <!-- Axis lines (6 axes) -->
+  <line x1="300" y1="270" x2="300" y2="70" class="axis-line"/>
+  <line x1="300" y1="270" x2="473" y2="170" class="axis-line"/>
+  <line x1="300" y1="270" x2="473" y2="370" class="axis-line"/>
+  <line x1="300" y1="270" x2="300" y2="470" class="axis-line"/>
+  <line x1="300" y1="270" x2="127" y2="370" class="axis-line"/>
+  <line x1="300" y1="270" x2="127" y2="170" class="axis-line"/>
 
-  <!-- Labels -->
-  <text x="250" y="30" text-anchor="middle" class="label" font-weight="600">Data Analyst</text>
-  <text x="440" y="145" text-anchor="start" class="label" font-weight="600">Data Scientist</text>
-  <text x="440" y="360" text-anchor="start" class="label" font-weight="600">Data Engineer</text>
-  <text x="250" y="475" text-anchor="middle" class="label" font-weight="600">ML Engineer</text>
-  <text x="60" y="360" text-anchor="end" class="label" font-weight="600">Chef Projet Data</text>
-  <text x="60" y="145" text-anchor="end" class="label" font-weight="600">Data Architect</text>
+  <!-- Profile Labels -->
+  <text x="300" y="50" text-anchor="middle" class="label">Data Analyst</text>
+  <text x="490" y="165" text-anchor="start" class="label">Data Scientist</text>
+  <text x="490" y="380" text-anchor="start" class="label">Data Engineer</text>
+  <text x="300" y="495" text-anchor="middle" class="label">ML Engineer</text>
+  <text x="110" y="380" text-anchor="end" class="label">Chef Projet</text>
+  <text x="110" y="165" text-anchor="end" class="label">Data Architect</text>
 
-  <!-- Perfect team polygon - each member excels in one area (95%) but has basics everywhere (40%) -->
-  <!-- Points calculated for: top=95%, others=40% for first member, rotating for each -->
-  <polygon class="team-area" points="
-    250,58
-    385,168
-    385,332
-    250,442
-    115,332
-    115,168
-  "/>
+  <!-- Team Member A - Expert Data Analyst (high on Analyst, medium elsewhere) -->
+  <polygon class="team-member member-a" points="300,78 380,200 380,340 300,390 220,340 220,200"/>
 
-  <!-- Specialist dots - showing where each team member excels -->
-  <circle cx="250" cy="58" r="6" class="dot" style="fill:#002FA7;"/>
-  <circle cx="385" cy="168" r="6" class="dot" style="fill:#4A90D9;"/>
-  <circle cx="385" cy="332" r="6" class="dot" style="fill:#7CB9E8;"/>
-  <circle cx="250" cy="442" r="6" class="dot" style="fill:#002FA7;"/>
-  <circle cx="115" cy="332" r="6" class="dot" style="fill:#4A90D9;"/>
-  <circle cx="115" cy="168" r="6" class="dot" style="fill:#7CB9E8;"/>
+  <!-- Team Member B - Expert Data Scientist (high on Scientist, medium elsewhere) -->
+  <polygon class="team-member member-b" points="300,150 460,185 380,340 300,390 220,340 160,200"/>
+
+  <!-- Team Member C - Expert Data Engineer (high on Engineer, medium elsewhere) -->
+  <polygon class="team-member member-c" points="300,150 380,200 460,355 300,390 220,340 160,200"/>
+
+  <!-- Team Member D - Expert ML Engineer (high on ML, medium elsewhere) -->
+  <polygon class="team-member member-d" points="300,150 380,200 380,340 300,462 220,340 160,200"/>
+
+  <!-- Team Member E - Expert Chef Projet (high on PM, medium elsewhere) -->
+  <polygon class="team-member member-e" points="300,150 380,200 380,340 300,390 140,355 160,200"/>
+
+  <!-- Team Member F - Expert Data Architect (high on Architect, medium elsewhere) -->
+  <polygon class="team-member member-f" points="300,150 380,200 380,340 300,390 220,340 140,185"/>
 
   <!-- Legend -->
-  <g transform="translate(30, 30)">
-    <circle cx="8" cy="8" r="6" fill="#002FA7"/>
-    <text x="20" y="12" class="legend">Équipe Idéale</text>
+  <g transform="translate(20, 20)">
+    <rect x="0" y="0" width="12" height="12" rx="2" fill="#002FA7"/>
+    <text x="18" y="10" class="legend-text">Alice - Data Analyst</text>
+
+    <rect x="0" y="20" width="12" height="12" rx="2" fill="#E63946"/>
+    <text x="18" y="30" class="legend-text">Bob - Data Scientist</text>
+
+    <rect x="0" y="40" width="12" height="12" rx="2" fill="#2A9D8F"/>
+    <text x="18" y="50" class="legend-text">Clara - Data Engineer</text>
+
+    <rect x="0" y="60" width="12" height="12" rx="2" fill="#F4A261"/>
+    <text x="18" y="70" class="legend-text">David - ML Engineer</text>
+
+    <rect x="0" y="80" width="12" height="12" rx="2" fill="#9B5DE5"/>
+    <text x="18" y="90" class="legend-text">Emma - Chef Projet</text>
+
+    <rect x="0" y="100" width="12" height="12" rx="2" fill="#00B4D8"/>
+    <text x="18" y="110" class="legend-text">Fabien - Data Architect</text>
   </g>
 
-  <!-- Tagline -->
-  <text x="250" y="495" text-anchor="middle" class="label" style="font-size:10px;fill:#57534e;">
-    Chaque membre excelle dans un domaine, maîtrise les bases partout
-  </text>
 </svg>
 </div>
 """
 
 st.components.v1.html(ANIMATED_RADAR_HTML, height=550)
+
+st.markdown("""
+<div style="text-align:center;color:#57534e;font-size:14px;margin-top:-20px;">
+<strong>6 experts</strong> · Chacun excelle dans son domaine · Ensemble, ils couvrent tous les besoins data
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
