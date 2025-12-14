@@ -145,5 +145,38 @@ If you see "Veuillez charger un data position", go to the "Qualification" tab fi
 
 ---
 
+---
+
+### 8. Streamlit Cloud Secrets Configuration
+
+**Problem**:
+```
+KeyError: 'st.secrets has no key "grist". Did you forget to add it to secrets.toml,
+mount it to secret directory, or the app settings on Streamlit Cloud?
+```
+
+**Cause**: On Streamlit Community Cloud, secrets must be configured through the web interface, not via a local `secrets.toml` file.
+
+**Solution**:
+1. Go to your app on [Streamlit Community Cloud](https://share.streamlit.io/)
+2. Click **"Manage app"** (bottom right corner)
+3. Click **"Settings"** → **"Secrets"**
+4. Paste the following configuration:
+
+```toml
+[grist]
+api_key = "YOUR_GRIST_API_KEY"
+doc_id = "YOUR_GRIST_DOC_ID"
+server = "https://docs.getgrist.com"
+subdomain = "docs"
+```
+
+5. Click **"Save"**
+6. The app will automatically reboot
+
+**Note**: Local development uses `.streamlit/secrets.toml`, but Streamlit Cloud requires secrets to be entered through the dashboard.
+
+---
+
 ## Contact
 For issues not covered here, check the GitHub repository or raise an issue.
