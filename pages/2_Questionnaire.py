@@ -25,10 +25,12 @@ inject_styles(hide_sidebar=True)
 
 # Banner - seamless integration with large logo
 st.components.v1.html("""
+<html><body style="margin:0;padding:0;background:transparent !important;">
 <div style="width:100%;height:200px;display:flex;justify-content:center;align-items:center;padding:15px;background:transparent;">
-    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true&v=3"
+    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true&v=4"
          style="max-width:100%;max-height:100%;background:transparent;" alt="La Forge Data Position">
 </div>
+</body></html>
 """, height=230)
 
 # Constants

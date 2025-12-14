@@ -6,7 +6,7 @@ Following DataGyver philosophy: framework becomes invisible to users
 import streamlit as st
 
 # =============================================================================
-# COLOR PALETTE - Warm neutrals
+# COLOR PALETTE - Warm neutrals with Klein Blue accent
 # =============================================================================
 COLORS = {
     "bg_primary": "#fafaf9",
@@ -15,8 +15,8 @@ COLORS = {
     "text_primary": "#1c1917",
     "text_secondary": "#57534e",
     "text_muted": "#a8a29e",
-    "accent": "#2563eb",
-    "accent_hover": "#1d4ed8",
+    "accent": "#002FA7",  # International Klein Blue - punchy wake-up color
+    "accent_hover": "#001d6e",
     "border": "#e7e5e4",
     "success": "#22c55e",
     "error": "#ef4444",
@@ -34,8 +34,8 @@ PALETTE_CSS = """
     --color-text-primary: #1c1917;
     --color-text-secondary: #57534e;
     --color-text-muted: #a8a29e;
-    --color-accent: #2563eb;
-    --color-accent-hover: #1d4ed8;
+    --color-accent: #002FA7;
+    --color-accent-hover: #001d6e;
     --color-border: #e7e5e4;
     --color-success: #22c55e;
     --color-error: #ef4444;
@@ -122,7 +122,7 @@ COMPONENT_CSS = """
 .stTextInput input:focus,
 .stSelectbox > div > div:focus-within {
     border-color: var(--color-accent) !important;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+    box-shadow: 0 0 0 2px rgba(0, 47, 167, 0.15) !important;
 }
 
 /* Radio buttons */
