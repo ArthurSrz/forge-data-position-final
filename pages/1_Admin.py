@@ -25,13 +25,13 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Banner - seamless integration
+# Banner - seamless integration with large logo
 st.components.v1.html("""
-<div style="width:100%;height:150px;display:flex;justify-content:center;align-items:center;padding:10px;background:transparent;">
-    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true&v=2"
+<div style="width:100%;height:250px;display:flex;justify-content:center;align-items:center;padding:20px;background:transparent;">
+    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true&v=3"
          style="max-width:100%;max-height:100%;background:transparent;" alt="La Forge Data Position">
 </div>
-""", height=170)
+""", height=280)
 
 # Load secrets
 SERVER = st.secrets["grist"]["server"]
