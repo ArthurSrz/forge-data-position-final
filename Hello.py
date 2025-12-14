@@ -16,15 +16,10 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Banner - seamless integration with large logo
-st.components.v1.html("""
-<html><body style="margin:0;padding:0;background:transparent !important;">
-<div style="width:100%;height:350px;display:flex;justify-content:center;align-items:center;padding:30px;background:transparent;">
-    <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true&v=4"
-         style="max-width:100%;max-height:100%;background:transparent;" alt="La Forge Data Position">
-</div>
-</body></html>
-""", height=380)
+# Banner - seamless integration with large logo using st.image (no iframe)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("resource/logo_forge.png", use_container_width=True)
 
 st.title("Bienvenue sur La Forge à Data Position")
 
