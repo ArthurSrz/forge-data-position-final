@@ -76,8 +76,7 @@ st.markdown("""
 </style>
 <div class="top-nav">
     <div class="nav-logo">
-        <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
-            <img src="https://raw.githubusercontent.com/ArthurSrz/forge-data-position-final/main/resource/logo_forge.png" alt="Logo">
+        <a href="/" style="text-decoration:none;">
             <span class="nav-brand">Data Position Studio</span>
         </a>
     </div>

@@ -70,7 +70,6 @@ st.markdown("""
 </style>
 <div class="top-nav">
     <div class="nav-logo">
-        <img src="https://raw.githubusercontent.com/ArthurSrz/forge-data-position-final/main/resource/logo_forge.png" alt="Logo">
         <span class="nav-brand">Data Position Studio</span>
     </div>
     <div class="nav-links">
@@ -83,10 +82,10 @@ st.markdown("""
 st.markdown("# Composez votre <span style='color:#002FA7'>Dream Team</span> Data", unsafe_allow_html=True)
 st.markdown("<p style='color:#57534e;font-size:16px;margin-top:-10px;'>L'outil de cartographie des compétences pour les Chief Data Officers et Heads of Data</p>", unsafe_allow_html=True)
 
-# Animated radar with overlapping team members
+# Animated radar with overlapping team members (compact)
 ANIMATED_RADAR_HTML = """
-<div style="display:flex;justify-content:center;align-items:center;padding:20px;">
-<svg viewBox="0 0 600 550" width="100%" style="max-width:700px;">
+<div style="display:flex;justify-content:center;align-items:center;padding:10px;">
+<svg viewBox="0 0 600 500" width="100%" style="max-width:500px;">
   <defs>
     <style>
       .grid-line { stroke: #e7e5e4; stroke-width: 1; fill: none; }
@@ -192,7 +191,7 @@ ANIMATED_RADAR_HTML = """
 </div>
 """
 
-st.components.v1.html(ANIMATED_RADAR_HTML, height=550)
+st.components.v1.html(ANIMATED_RADAR_HTML, height=380)
 
 st.markdown("""
 <div style="text-align:center;color:#57534e;font-size:14px;margin-top:-20px;">
