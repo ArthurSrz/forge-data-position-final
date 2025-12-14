@@ -3,7 +3,6 @@ La Forge à Data Position - Landing Page
 """
 
 import streamlit as st
-from streamlit_elements import elements, nivo
 from styles import inject_styles
 
 # Page configuration
@@ -17,7 +16,7 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Logo in sidebar
+# Logo in sidebar at top
 with st.sidebar:
     st.image("resource/logo_forge.png", use_container_width=True)
 
@@ -28,66 +27,118 @@ st.markdown("""
 
 Un **Data Position** est un référentiel de compétences data qui permet de :
 
-- <span style='color:#002FA7;font-weight:600'>Cartographier</span> les profils data de votre organisation (Data Analyst, Data Scientist, ML Engineer, etc.)
-- <span style='color:#002FA7;font-weight:600'>Évaluer</span> les compétences de vos collaborateurs via un questionnaire standardisé
-- <span style='color:#002FA7;font-weight:600'>Visualiser</span> la répartition des expertises grâce à un radar de compétences
+- <span style='color:#002FA7;font-weight:600'>Cartographier</span> les profils data de votre organisation
+- <span style='color:#002FA7;font-weight:600'>Évaluer</span> les compétences de vos collaborateurs
+- <span style='color:#002FA7;font-weight:600'>Visualiser</span> la répartition des expertises
 """, unsafe_allow_html=True)
 
-# Demo radar chart - showcase data profiles
-st.markdown("### <span style='color:#002FA7'>Visualisez</span> vos profils data", unsafe_allow_html=True)
+# Animated radar chart - "Perfect Team" visualization
+st.markdown("### <span style='color:#002FA7'>L'équipe data idéale</span>", unsafe_allow_html=True)
 
-DEMO_DATA = [
-    {"profile": "Data Analyst", "Équipe Alpha": 85, "Équipe Beta": 65, "Équipe Gamma": 75},
-    {"profile": "Data Scientist", "Équipe Alpha": 70, "Équipe Beta": 90, "Équipe Gamma": 60},
-    {"profile": "Data Engineer", "Équipe Alpha": 60, "Équipe Beta": 75, "Équipe Gamma": 95},
-    {"profile": "ML Engineer", "Équipe Alpha": 55, "Équipe Beta": 85, "Équipe Gamma": 70},
-    {"profile": "Chef de Projet Data", "Équipe Alpha": 90, "Équipe Beta": 60, "Équipe Gamma": 80},
-    {"profile": "Data Architect", "Équipe Alpha": 50, "Équipe Beta": 70, "Équipe Gamma": 85},
-]
+ANIMATED_RADAR_HTML = """
+<div style="display:flex;justify-content:center;align-items:center;padding:20px;">
+<svg viewBox="0 0 500 500" width="100%" style="max-width:600px;max-height:500px;">
+  <defs>
+    <style>
+      .grid-line { stroke: #e7e5e4; stroke-width: 1; fill: none; }
+      .axis-line { stroke: #e7e5e4; stroke-width: 1; }
+      .label { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #1c1917; }
+      .team-area { fill: #002FA7; fill-opacity: 0; stroke: #002FA7; stroke-width: 2; }
+      .dot { fill: #002FA7; opacity: 0; }
+      .legend { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; fill: #1c1917; }
 
-with elements("demo_radar"):
-    nivo.Radar(
-        data=DEMO_DATA,
-        keys=["Équipe Alpha", "Équipe Beta", "Équipe Gamma"],
-        indexBy="profile",
-        maxValue=100,
-        margin={"top": 70, "right": 80, "bottom": 40, "left": 80},
-        curve="linearClosed",
-        borderWidth=2,
-        borderColor={"from": "color"},
-        gridLevels=5,
-        gridShape="circular",
-        gridLabelOffset=20,
-        enableDots=True,
-        dotSize=8,
-        dotColor={"theme": "background"},
-        dotBorderWidth=2,
-        dotBorderColor={"from": "color"},
-        colors=["#002FA7", "#4A90D9", "#7CB9E8"],
-        fillOpacity=0.25,
-        blendMode="multiply",
-        animate=True,
-        motionConfig="gentle",
-        legends=[
-            {
-                "anchor": "top-left",
-                "direction": "column",
-                "translateX": -50,
-                "translateY": -40,
-                "itemWidth": 100,
-                "itemHeight": 20,
-                "itemTextColor": "#1c1917",
-                "symbolSize": 12,
-                "symbolShape": "circle",
-            }
-        ],
-        theme={
-            "textColor": "#1c1917",
-            "fontSize": 12,
-            "grid": {"line": {"stroke": "#e7e5e4"}},
-        },
-        sx={"height": 500},
-    )
+      /* Animation keyframes */
+      @keyframes fillIn {
+        0% { fill-opacity: 0; }
+        100% { fill-opacity: 0.3; }
+      }
+      @keyframes drawPath {
+        0% { stroke-dashoffset: 1000; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+      @keyframes pulse {
+        0%, 100% { r: 6; }
+        50% { r: 8; }
+      }
+
+      .team-area {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: drawPath 2s ease-out forwards, fillIn 1s ease-out 1.5s forwards;
+      }
+      .dot {
+        animation: fadeIn 0.5s ease-out forwards, pulse 2s ease-in-out infinite;
+      }
+      .dot:nth-child(1) { animation-delay: 0.5s, 2.5s; }
+      .dot:nth-child(2) { animation-delay: 0.7s, 2.7s; }
+      .dot:nth-child(3) { animation-delay: 0.9s, 2.9s; }
+      .dot:nth-child(4) { animation-delay: 1.1s, 3.1s; }
+      .dot:nth-child(5) { animation-delay: 1.3s, 3.3s; }
+      .dot:nth-child(6) { animation-delay: 1.5s, 3.5s; }
+    </style>
+  </defs>
+
+  <!-- Grid circles -->
+  <circle cx="250" cy="250" r="40" class="grid-line"/>
+  <circle cx="250" cy="250" r="80" class="grid-line"/>
+  <circle cx="250" cy="250" r="120" class="grid-line"/>
+  <circle cx="250" cy="250" r="160" class="grid-line"/>
+  <circle cx="250" cy="250" r="200" class="grid-line"/>
+
+  <!-- Axis lines (6 axes for 6 profiles) -->
+  <line x1="250" y1="250" x2="250" y2="50" class="axis-line"/>
+  <line x1="250" y1="250" x2="423" y2="150" class="axis-line"/>
+  <line x1="250" y1="250" x2="423" y2="350" class="axis-line"/>
+  <line x1="250" y1="250" x2="250" y2="450" class="axis-line"/>
+  <line x1="250" y1="250" x2="77" y2="350" class="axis-line"/>
+  <line x1="250" y1="250" x2="77" y2="150" class="axis-line"/>
+
+  <!-- Labels -->
+  <text x="250" y="30" text-anchor="middle" class="label" font-weight="600">Data Analyst</text>
+  <text x="440" y="145" text-anchor="start" class="label" font-weight="600">Data Scientist</text>
+  <text x="440" y="360" text-anchor="start" class="label" font-weight="600">Data Engineer</text>
+  <text x="250" y="475" text-anchor="middle" class="label" font-weight="600">ML Engineer</text>
+  <text x="60" y="360" text-anchor="end" class="label" font-weight="600">Chef Projet Data</text>
+  <text x="60" y="145" text-anchor="end" class="label" font-weight="600">Data Architect</text>
+
+  <!-- Perfect team polygon - each member excels in one area (95%) but has basics everywhere (40%) -->
+  <!-- Points calculated for: top=95%, others=40% for first member, rotating for each -->
+  <polygon class="team-area" points="
+    250,58
+    385,168
+    385,332
+    250,442
+    115,332
+    115,168
+  "/>
+
+  <!-- Specialist dots - showing where each team member excels -->
+  <circle cx="250" cy="58" r="6" class="dot" style="fill:#002FA7;"/>
+  <circle cx="385" cy="168" r="6" class="dot" style="fill:#4A90D9;"/>
+  <circle cx="385" cy="332" r="6" class="dot" style="fill:#7CB9E8;"/>
+  <circle cx="250" cy="442" r="6" class="dot" style="fill:#002FA7;"/>
+  <circle cx="115" cy="332" r="6" class="dot" style="fill:#4A90D9;"/>
+  <circle cx="115" cy="168" r="6" class="dot" style="fill:#7CB9E8;"/>
+
+  <!-- Legend -->
+  <g transform="translate(30, 30)">
+    <circle cx="8" cy="8" r="6" fill="#002FA7"/>
+    <text x="20" y="12" class="legend">Équipe Idéale</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="250" y="495" text-anchor="middle" class="label" style="font-size:10px;fill:#57534e;">
+    Chaque membre excelle dans un domaine, maîtrise les bases partout
+  </text>
+</svg>
+</div>
+"""
+
+st.components.v1.html(ANIMATED_RADAR_HTML, height=550)
 
 st.divider()
 
