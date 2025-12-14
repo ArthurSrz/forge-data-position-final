@@ -1,11 +1,13 @@
 import requests
+import os
 
-# Specify the necessary parameters
+# Load credentials from environment variables
+# Set these before running: export GRIST_API_KEY="your_key" && export GRIST_DOC_ID="your_doc_id"
 subdomain = "docs"
-docId = "nSV5r7CLQCWzKqZCz7qBor"
+docId = os.environ.get("GRIST_DOC_ID", "YOUR_DOC_ID_HERE")
 tableId = "Form2"
 api_url = f"https://{subdomain}.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
-api_key = "3a00dc02645f6f36f4e1c9449dd4a8529b5e9149"
+api_key = os.environ.get("GRIST_API_KEY", "YOUR_API_KEY_HERE")
 # Set up the API key for authorization
 headers = {
     "Authorization": f"Bearer {api_key}"
