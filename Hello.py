@@ -16,13 +16,11 @@ st.set_page_config(
 # Inject custom styles
 inject_styles()
 
-# Logo at top left
-col_logo, col_spacer = st.columns([1, 4])
-with col_logo:
-    st.image("resource/logo_forge.png", width=150)
+# Classic logo at top left
+st.image("resource/logo_forge.png", width=120)
 
 st.markdown("# Composez votre <span style='color:#002FA7'>Dream Team</span> Data", unsafe_allow_html=True)
-st.markdown("### <span style='color:#57534e'>L'outil de cartographie des compétences pour les Chief Data Officers</span>", unsafe_allow_html=True)
+st.markdown("<p style='color:#57534e;font-size:16px;margin-top:-10px;'>L'outil de cartographie des compétences pour les Chief Data Officers et Heads of Data</p>", unsafe_allow_html=True)
 
 # Animated radar with overlapping team members
 ANIMATED_RADAR_HTML = """
