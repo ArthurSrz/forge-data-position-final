@@ -1,6 +1,6 @@
 """
 Questionnaire Interface - La Forge à Data Position
-Public interface for collaborators to fill out the questionnaire
+Clean, step-by-step questionnaire for collaborators
 """
 
 import pandas as pd
@@ -12,17 +12,38 @@ import numpy as np
 st.set_page_config(
     page_title="Questionnaire - Forge Data Position",
     page_icon="📝",
-    layout='wide',
+    layout='centered',
     initial_sidebar_state='collapsed'
 )
 
+# Custom CSS for better UX
+st.markdown("""
+<style>
+    .stProgress > div > div > div > div {
+        background-color: #1c3f4b;
+    }
+    .question-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    .step-indicator {
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Banner
 st.components.v1.html("""
-<div style="width:100%;height:150px;display:flex;justify-content:center;align-items:center;padding:10px;">
+<div style="width:100%;height:120px;display:flex;justify-content:center;align-items:center;padding:10px;">
     <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true"
          style="max-width:100%;max-height:100%;" alt="La Forge Data Position">
 </div>
-""")
+""", height=140)
 
 # Load secrets
 DOC_ID = st.secrets["grist"]["doc_id"]
@@ -43,187 +64,274 @@ def load_grist_table(table_name):
         return {"records": []}, str(e)
 
 
-def add_answers_to_grist(df_answers, table_id):
+def add_answers_to_grist(answers_list, table_id="Form3"):
     """Submit answers to Grist."""
     try:
-        records = [{
-            "fields": {
-                "nom": r["nom"],
-                "prenom": r["prenom"],
-                "mail": r["mail"],
-                "question": r["question"],
-                "reponse": r["reponse"],
-                "score": r["score"],
-                "profile_type": r["profile_type"]
-            }
-        } for r in df_answers.to_dict(orient='records')]
-
+        records = [{"fields": a} for a in answers_list]
         url = f"https://{subdomain}.getgrist.com/api/docs/{DOC_ID}/tables/{table_id}/records"
         response = requests.post(url, headers=headers, json={"records": records})
-
-        if response.status_code == 200:
-            return True, "Réponses enregistrées avec succès !"
-        return False, f"Erreur: {response.status_code}"
+        return response.status_code == 200, response.text
     except Exception as e:
         return False, str(e)
 
 
-# Load master questions
+# Initialize session state
+if 'step' not in st.session_state:
+    st.session_state.step = 0
+if 'user_info' not in st.session_state:
+    st.session_state.user_info = {}
+if 'selected_profile' not in st.session_state:
+    st.session_state.selected_profile = None
+if 'answers' not in st.session_state:
+    st.session_state.answers = {}
+if 'submitted' not in st.session_state:
+    st.session_state.submitted = False
+
+# Load questions
 data2, error = load_grist_table("Form2")
 if error:
     st.error(f"Impossible de charger le questionnaire: {error}")
     st.stop()
 
-# Convert to DataFrame
 records = data2.get('records', [])
 if not records:
-    st.warning("Aucune question disponible. Contactez votre administrateur.")
+    st.warning("Aucune question disponible.")
     st.stop()
 
 questions_df = pd.json_normalize(records, sep='_')
 questions_df.columns = [col.replace('fields_', '') for col in questions_df.columns]
 
 # Get available profiles
-available_profiles = questions_df['profile_type'].dropna().unique()
-available_profiles = [p for p in available_profiles if p and "'" not in p]  # Filter clean profiles
+available_profiles = sorted(questions_df['profile_type'].dropna().unique())
 
 # =============================================================================
-# QUESTIONNAIRE
+# STEP 0: Welcome & User Info
 # =============================================================================
+if st.session_state.step == 0:
+    st.title("Évaluez vos compétences data")
 
-st.title("Évaluation de vos compétences data")
-
-with st.expander("ℹ️ Comment remplir ce questionnaire ?", expanded=False):
     st.markdown("""
-    Ce questionnaire permet d'évaluer vos compétences data pour mieux positionner
-    les talents de l'équipe.
+    Bienvenue ! Ce questionnaire permet d'évaluer vos compétences data
+    pour mieux positionner les talents de l'équipe.
 
-    **Instructions :**
-    1. Renseignez vos informations personnelles
-    2. Indiquez votre profil data principal
-    3. Répondez aux questions d'expertise
-    4. Validez vos réponses
-
-    Vos réponses seront transmises à votre responsable qui pourra visualiser
-    la répartition des compétences dans l'équipe.
+    **Durée estimée** : 5-10 minutes
     """)
-
-st.divider()
-
-# Initialize answers storage
-if 'answers' not in st.session_state:
-    st.session_state.answers = []
-
-# Profile selection for filtering questions
-selected_profiles = st.multiselect(
-    "Pour quels profils souhaitez-vous être évalué(e) ?",
-    available_profiles,
-    default=available_profiles[:3] if len(available_profiles) >= 3 else available_profiles,
-    help="Sélectionnez les profils data qui correspondent à votre activité"
-)
-
-if not selected_profiles:
-    st.warning("Veuillez sélectionner au moins un profil.")
-    st.stop()
-
-# Filter questions by selected profiles
-filtered_df = questions_df[questions_df['profile_type'].isin(selected_profiles)]
-
-# Separate screening and expertise questions
-screening_df = filtered_df[filtered_df.get('question_type', '') == 'screening'] if 'question_type' in filtered_df.columns else pd.DataFrame()
-expertise_df = filtered_df[filtered_df.get('question_type', '') == 'expertise'] if 'question_type' in filtered_df.columns else filtered_df
-
-st.divider()
-
-# =============================================================================
-# PERSONAL INFO
-# =============================================================================
-st.header("🧑 Vos informations")
-
-col1, col2 = st.columns(2)
-with col1:
-    nom = st.text_input("Nom *", key='nom')
-    prenom = st.text_input("Prénom *", key='prenom')
-with col2:
-    mail = st.text_input("Email *", key='mail')
-
-if not nom or not prenom or not mail:
-    st.info("Veuillez remplir tous les champs obligatoires (*)")
-
-st.divider()
-
-# =============================================================================
-# QUESTIONS
-# =============================================================================
-st.header("📚 Questions d'expertise")
-
-# Collect answers
-df_answers = pd.DataFrame(columns=['nom', 'prenom', 'mail', 'question', 'reponse', 'score', 'profile_type'])
-
-# Get unique questions
-unique_questions = expertise_df['question'].unique() if not expertise_df.empty else []
-
-for i, question in enumerate(unique_questions):
-    st.markdown(f"**{question}**")
-
-    # Get possible answers for this question
-    question_data = expertise_df[expertise_df['question'] == question]
-    possible_answers = question_data['reponse'].unique()
-
-    answer = st.selectbox(
-        "Votre réponse",
-        options=["-- Sélectionnez --"] + list(possible_answers),
-        key=f"q_{i}",
-        label_visibility="collapsed"
-    )
-
-    if answer != "-- Sélectionnez --":
-        # Get score and profile for this answer
-        answer_row = question_data[question_data['reponse'] == answer].iloc[0]
-        score = answer_row.get('score', 0)
-        profile_type = answer_row.get('profile_type', '')
-
-        # Handle numpy arrays
-        if isinstance(score, np.ndarray):
-            score = int(score[0]) if len(score) > 0 else 0
-        if isinstance(profile_type, np.ndarray):
-            profile_type = str(profile_type[0]) if len(profile_type) > 0 else ''
-
-        new_row = pd.DataFrame([{
-            'nom': nom,
-            'prenom': prenom,
-            'mail': mail,
-            'question': question,
-            'reponse': answer,
-            'score': score,
-            'profile_type': profile_type
-        }])
-        df_answers = pd.concat([df_answers, new_row], ignore_index=True)
 
     st.divider()
 
+    st.subheader("🧑 Vos informations")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        nom = st.text_input("Nom", value=st.session_state.user_info.get('nom', ''))
+        prenom = st.text_input("Prénom", value=st.session_state.user_info.get('prenom', ''))
+    with col2:
+        mail = st.text_input("Email", value=st.session_state.user_info.get('mail', ''))
+
+    st.divider()
+
+    st.subheader("🎯 Votre profil data principal")
+    st.caption("Sélectionnez le profil qui correspond le mieux à votre activité")
+
+    selected = st.radio(
+        "Profil",
+        available_profiles,
+        index=None,
+        label_visibility="collapsed"
+    )
+
+    st.divider()
+
+    # Validation
+    can_proceed = nom and prenom and mail and selected
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col3:
+        if st.button("Commencer →", type="primary", disabled=not can_proceed):
+            st.session_state.user_info = {'nom': nom, 'prenom': prenom, 'mail': mail}
+            st.session_state.selected_profile = selected
+            st.session_state.step = 1
+            st.rerun()
+
+    if not can_proceed:
+        st.info("Remplissez tous les champs et sélectionnez un profil pour continuer.")
+
 # =============================================================================
-# SUBMIT
+# STEP 1+: Questions by type
 # =============================================================================
-st.header("✅ Validation")
+elif not st.session_state.submitted:
+    # Filter questions for selected profile
+    profile_df = questions_df[questions_df['profile_type'] == st.session_state.selected_profile]
 
-answered_count = len(df_answers)
-total_questions = len(unique_questions)
+    # Group by question type
+    question_types = ['screening', 'expertise', 'mastery']
+    available_types = [qt for qt in question_types if qt in profile_df['question_type'].values]
 
-if answered_count < total_questions:
-    st.warning(f"Vous avez répondu à {answered_count}/{total_questions} questions.")
+    if not available_types:
+        st.error("Aucune question disponible pour ce profil.")
+        if st.button("← Retour"):
+            st.session_state.step = 0
+            st.rerun()
+        st.stop()
 
-col1, col2 = st.columns([3, 1])
-with col2:
-    if st.button("Envoyer mes réponses", type="primary", disabled=(not nom or not prenom or not mail)):
-        if answered_count == 0:
-            st.error("Veuillez répondre à au moins une question.")
-        else:
-            with st.spinner("Envoi en cours..."):
-                success, message = add_answers_to_grist(df_answers, "Form3")
+    # Calculate current question type index
+    type_index = st.session_state.step - 1
 
-            if success:
-                st.success("🎉 Merci ! Vos réponses ont été enregistrées.")
-                st.balloons()
+    if type_index >= len(available_types):
+        # All questions answered - show summary
+        st.title("📋 Récapitulatif")
+
+        st.success(f"Vous avez répondu à toutes les questions pour le profil **{st.session_state.selected_profile}**")
+
+        # Show summary
+        st.subheader("Vos réponses")
+        for q_type in available_types:
+            type_label = {'screening': '🔍 Screening', 'expertise': '💡 Expertise', 'mastery': '🎓 Maîtrise'}.get(q_type, q_type)
+            st.markdown(f"**{type_label}**")
+
+            type_questions = profile_df[profile_df['question_type'] == q_type]['question'].unique()
+            for q in type_questions:
+                if q in st.session_state.answers:
+                    ans = st.session_state.answers[q]
+                    st.markdown(f"- {q[:50]}... → Score: {ans['score']}")
+
+        st.divider()
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("← Modifier mes réponses"):
+                st.session_state.step = 1
+                st.rerun()
+        with col2:
+            if st.button("✅ Envoyer mes réponses", type="primary"):
+                # Prepare final answers
+                final_answers = []
+                for question, data in st.session_state.answers.items():
+                    final_answers.append({
+                        'nom': st.session_state.user_info['nom'],
+                        'prenom': st.session_state.user_info['prenom'],
+                        'mail': st.session_state.user_info['mail'],
+                        'question': question,
+                        'reponse': data['reponse'],
+                        'score': data['score'],
+                        'profile_type': st.session_state.selected_profile
+                    })
+
+                with st.spinner("Envoi en cours..."):
+                    success, msg = add_answers_to_grist(final_answers)
+
+                if success:
+                    st.session_state.submitted = True
+                    st.rerun()
+                else:
+                    st.error(f"Erreur: {msg}")
+    else:
+        # Show questions for current type
+        current_type = available_types[type_index]
+        type_questions = profile_df[profile_df['question_type'] == current_type]
+        unique_questions = type_questions['question'].unique()
+
+        # Header with progress
+        type_labels = {'screening': 'Screening', 'expertise': 'Expertise', 'mastery': 'Maîtrise'}
+        type_icons = {'screening': '🔍', 'expertise': '💡', 'mastery': '🎓'}
+
+        progress = (type_index) / len(available_types)
+        st.progress(progress)
+        st.markdown(f"<div class='step-indicator'>Étape {type_index + 1}/{len(available_types)} • {st.session_state.selected_profile}</div>", unsafe_allow_html=True)
+
+        st.title(f"{type_icons.get(current_type, '📝')} {type_labels.get(current_type, current_type)}")
+
+        # Type description
+        type_descriptions = {
+            'screening': "Ces questions permettent d'évaluer votre niveau général dans ce domaine.",
+            'expertise': "Ces questions évaluent vos compétences techniques spécifiques.",
+            'mastery': "Ces questions mesurent votre niveau de maîtrise avancée."
+        }
+        st.caption(type_descriptions.get(current_type, ""))
+
+        st.divider()
+
+        # Questions
+        all_answered = True
+        for i, question in enumerate(unique_questions):
+            st.markdown(f"**Question {i+1}/{len(unique_questions)}**")
+            st.markdown(f"*{question}*")
+
+            # Get possible answers sorted by score (descending)
+            q_data = type_questions[type_questions['question'] == question].sort_values('score', ascending=False)
+            possible_answers = q_data['reponse'].tolist()
+            scores = q_data['score'].tolist()
+
+            # Create answer options with score indicators
+            current_answer = st.session_state.answers.get(question, {}).get('reponse', None)
+
+            # Find index of current answer
+            default_idx = None
+            if current_answer in possible_answers:
+                default_idx = possible_answers.index(current_answer)
+
+            selected_answer = st.radio(
+                f"q_{i}",
+                possible_answers,
+                index=default_idx,
+                label_visibility="collapsed",
+                key=f"{current_type}_{i}"
+            )
+
+            if selected_answer:
+                # Save answer
+                score_idx = possible_answers.index(selected_answer)
+                st.session_state.answers[question] = {
+                    'reponse': selected_answer,
+                    'score': scores[score_idx]
+                }
             else:
-                st.error(f"Erreur lors de l'envoi : {message}")
+                all_answered = False
+
+            st.divider()
+
+        # Navigation
+        col1, col2, col3 = st.columns([1, 1, 1])
+
+        with col1:
+            if type_index > 0:
+                if st.button("← Précédent"):
+                    st.session_state.step -= 1
+                    st.rerun()
+
+        with col3:
+            btn_label = "Suivant →" if type_index < len(available_types) - 1 else "Voir le récapitulatif →"
+            if st.button(btn_label, type="primary", disabled=not all_answered):
+                st.session_state.step += 1
+                st.rerun()
+
+        if not all_answered:
+            st.warning("Répondez à toutes les questions pour continuer.")
+
+# =============================================================================
+# SUBMITTED: Thank you page
+# =============================================================================
+else:
+    st.balloons()
+
+    st.title("🎉 Merci !")
+
+    st.success("Vos réponses ont été enregistrées avec succès.")
+
+    st.markdown(f"""
+    ### Récapitulatif
+
+    - **Nom** : {st.session_state.user_info['nom']} {st.session_state.user_info['prenom']}
+    - **Profil évalué** : {st.session_state.selected_profile}
+    - **Questions répondues** : {len(st.session_state.answers)}
+
+    Votre responsable pourra visualiser vos résultats dans le radar de compétences.
+    """)
+
+    if st.button("Recommencer avec un autre profil"):
+        # Reset state
+        st.session_state.step = 0
+        st.session_state.answers = {}
+        st.session_state.submitted = False
+        st.session_state.selected_profile = None
+        st.rerun()

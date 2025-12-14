@@ -95,10 +95,15 @@ with tab1:
             st.subheader("Data Position Maître")
             st.caption("Le référentiel par défaut créé par Datactivist")
 
+            # Get available profiles from Grist
+            available_profiles = ["Data Analyst", "Data Scientist", "Machine Learning Engineer",
+                                  "Geomaticien", "Data Engineer", "Data Protection Officer",
+                                  "Chef de Projet Data"]
+
             profiles = st.multiselect(
                 "Profils à évaluer",
-                ["Data Analyst", "Data Scientist", "Machine Learning Engineer", "Geomaticien", "Data Engineer", "Data Protection Officer", "Chef de Projet Data"],
-                max_selections=7,
+                available_profiles,
+                default=available_profiles,
                 key="master_profiles"
             )
 
