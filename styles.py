@@ -76,29 +76,24 @@ HIDE_SIDEBAR_CSS = """
 """
 
 COMPONENT_CSS = """
-/* Primary buttons */
+/* ALL buttons - Klein Blue border and text only (no fill) */
+.stButton > button,
 .stButton > button[kind="primary"],
-.stButton > button[data-testid="baseButton-primary"] {
-    background: var(--color-accent) !important;
-    border: none !important;
-    font-weight: 500 !important;
-    border-radius: 0.5rem !important;
-    transition: all 0.2s ease !important;
-}
-
-.stButton > button[kind="primary"]:hover,
-.stButton > button[data-testid="baseButton-primary"]:hover {
-    background: var(--color-accent-hover) !important;
-    transform: translateY(-1px) !important;
-}
-
-/* All buttons - Klein Blue border and text */
-.stButton > button {
+.stButton > button[data-testid="baseButton-primary"],
+.stButton > button[kind="secondary"],
+.stButton > button[data-testid="baseButton-secondary"] {
     background: transparent !important;
+    background-color: transparent !important;
     border: 2px solid #002FA7 !important;
     border-radius: 0.5rem !important;
     color: #002FA7 !important;
     font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    background: rgba(0, 47, 167, 0.05) !important;
+    transform: translateY(-1px) !important;
 }
 
 /* Page links - Klein Blue border and text */
@@ -112,6 +107,15 @@ COMPONENT_CSS = """
 
 .stPageLink a span {
     color: #002FA7 !important;
+}
+
+/* Download button - same style */
+.stDownloadButton > button {
+    background: transparent !important;
+    border: 2px solid #002FA7 !important;
+    border-radius: 0.5rem !important;
+    color: #002FA7 !important;
+    font-weight: 500 !important;
 }
 
 /* Expanders */
@@ -183,17 +187,6 @@ hr {
     font-weight: 600 !important;
 }
 
-/* Download button */
-.stDownloadButton > button {
-    background: var(--color-accent) !important;
-    border: none !important;
-    border-radius: 0.5rem !important;
-    font-weight: 500 !important;
-}
-
-.stDownloadButton > button:hover {
-    background: var(--color-accent-hover) !important;
-}
 """
 
 # =============================================================================
