@@ -3,12 +3,16 @@ Admin Interface - La Forge à Data Position
 For data team leads to create and manage Data Positions
 """
 
+import sys
+sys.path.insert(0, '..')
+
 import pandas as pd
 import streamlit as st
 from streamlit_elements import nivo, elements, mui
 from grist_api import GristDocAPI
 import requests
 import numpy as np
+from styles import inject_styles
 
 # Page configuration
 st.set_page_config(
@@ -18,13 +22,16 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
+# Inject custom styles
+inject_styles()
+
 # Banner
 st.components.v1.html("""
-<div style="width:100%;height:150px;display:flex;justify-content:center;align-items:center;padding:10px;">
+<div style="width:100%;height:150px;display:flex;justify-content:center;align-items:center;padding:10px;background:#fafaf9;">
     <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true"
          style="max-width:100%;max-height:100%;" alt="La Forge Data Position">
 </div>
-""")
+""", height=170)
 
 # Load secrets
 SERVER = st.secrets["grist"]["server"]

@@ -3,10 +3,14 @@ Questionnaire Interface - La Forge à Data Position
 Progressive disclosure questionnaire with adaptive profiling
 """
 
+import sys
+sys.path.insert(0, '..')
+
 import pandas as pd
 import streamlit as st
 import requests
 from datetime import datetime
+from styles import inject_styles
 
 # Page configuration
 st.set_page_config(
@@ -16,25 +20,12 @@ st.set_page_config(
     initial_sidebar_state='collapsed'
 )
 
-# Custom CSS - Hide sidebar completely for candidates
-st.markdown("""
-<style>
-    /* Hide sidebar */
-    [data-testid="stSidebar"] { display: none; }
-    [data-testid="stSidebarNav"] { display: none; }
-    [data-testid="collapsedControl"] { display: none; }
-
-    /* Custom styles */
-    .stProgress > div > div > div > div { background-color: #1c3f4b; }
-    .pass-badge { background-color: #28a745; color: white; padding: 5px 15px; border-radius: 20px; }
-    .fail-badge { background-color: #dc3545; color: white; padding: 5px 15px; border-radius: 20px; }
-    .score-display { font-size: 24px; font-weight: bold; text-align: center; padding: 20px; }
-</style>
-""", unsafe_allow_html=True)
+# Inject custom styles (hide sidebar for candidates)
+inject_styles(hide_sidebar=True)
 
 # Banner
 st.components.v1.html("""
-<div style="width:100%;height:120px;display:flex;justify-content:center;align-items:center;padding:10px;">
+<div style="width:100%;height:120px;display:flex;justify-content:center;align-items:center;padding:10px;background:#fafaf9;">
     <img src="https://github.com/ArthurSrz/forge-data-position-final/blob/main/resource/logo_forge.png?raw=true"
          style="max-width:100%;max-height:100%;" alt="La Forge Data Position">
 </div>
